@@ -12,7 +12,6 @@
 namespace GuoJiangClub\EC\Open\Core\Services;
 
 use Exception;
-use GuoJiangClub\Component\Order\Models\Order;
 use GuoJiangClub\Component\Discount\Applicators\DiscountApplicator;
 use GuoJiangClub\Component\Discount\Checkers\CouponEligibilityChecker;
 use GuoJiangClub\Component\Discount\Checkers\DatesEligibilityChecker;
@@ -21,10 +20,10 @@ use GuoJiangClub\Component\Discount\Models\Coupon;
 use GuoJiangClub\Component\Discount\Models\Discount;
 use GuoJiangClub\Component\Discount\Repositories\CouponRepository;
 use GuoJiangClub\Component\Discount\Repositories\DiscountRepository;
+use GuoJiangClub\Component\Order\Models\Order;
 use GuoJiangClub\EC\Open\Core\Discount\Checkers\DiscountEligibilityChecker;
 use GuoJiangClub\EC\Open\Core\Discount\Contracts\DiscountItemContract;
 use Illuminate\Support\Collection;
-
 
 class DiscountService
 {
@@ -35,12 +34,7 @@ class DiscountService
     protected $applicator;
     protected $datesEligibilityChecker;
 
-    public function __construct(DiscountRepository $discountRepository
-        , DiscountEligibilityChecker $discountEligibilityChecker
-        , CouponRepository $couponRepository
-        , CouponEligibilityChecker $couponEligibilityChecker
-        , DiscountApplicator $discountApplicator
-        , DatesEligibilityChecker $datesEligibilityChecker)
+    public function __construct(DiscountRepository $discountRepository, DiscountEligibilityChecker $discountEligibilityChecker, CouponRepository $couponRepository, CouponEligibilityChecker $couponEligibilityChecker, DiscountApplicator $discountApplicator, DatesEligibilityChecker $datesEligibilityChecker)
     {
         $this->discountRepository = $discountRepository;
         $this->discountChecker = $discountEligibilityChecker;
@@ -54,7 +48,7 @@ class DiscountService
     {
         try {
             $discounts = $this->discountRepository->findActive(0);
-            if (0 == count($discounts)) {
+            if (0 == $discounts->count()) {
                 return false;
             }
 
@@ -62,7 +56,7 @@ class DiscountService
                 return $this->discountChecker->isEligible($subject, $item);
             });
 
-            if (0 == count($filtered)) {
+            if (0 == $filtered->count()) {
                 return false;
             }
 
@@ -123,7 +117,7 @@ class DiscountService
     }
 
     /**
-     * 计算出优惠组合，把优惠的可能情况都计算出来给到前端
+     * 计算出优惠组合，把优惠的可能情况都计算出来给到前端.
      *
      * @param $discounts
      * @param $coupons
@@ -141,7 +135,6 @@ class DiscountService
         $normalCoupons = $coupons->where('discount.exclusive', 0);
 
         $exclusiveDiscounts->each(function ($item, $key) use ($groups) {
-
             $groups->push(['discount' => $item->id, 'coupon' => 0]);
         });
 
@@ -168,13 +161,12 @@ class DiscountService
         $result = new Collection();
 
         foreach ($groups as $group) {
-
             $discount = Discount::find($group['discount']);
             $coupon = Coupon::find($group['coupon']);
 
             list($discountAdjustment, $couponAdjustment, $adjustmentTotal) = $this->calculateDiscounts($order, $discount, $coupon);
 
-            if ($adjustmentTotal == 0) {
+            if (0 == $adjustmentTotal) {
                 continue;
             }
 
@@ -196,13 +188,12 @@ class DiscountService
         $discountAdjustment = 0;
         $couponAdjustment = 0;
 
-        $tempOrder = clone($order);
+        $tempOrder = clone $order;
 
         foreach ($discounts as $discount) {
             if (is_null($discount)) {
                 continue;
             }
-
 
             if ($discount->isCouponBased()) {
                 if ($this->couponChecker->isEligible($tempOrder, $discount)) {
@@ -213,7 +204,6 @@ class DiscountService
                 } else {
                     return 0;
                 }
-
             } else {
                 if ($this->discountChecker->isEligible($tempOrder, $discount)) {
                     $this->applicator->calculate($tempOrder, $discount);

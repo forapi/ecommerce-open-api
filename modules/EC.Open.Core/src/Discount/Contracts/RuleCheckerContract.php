@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of ibrand/discount.
+ * This file is part of ibrand/EC-Open-Core.
  *
  * (c) 果酱社区 <https://guojiang.club>
  *
@@ -10,9 +10,11 @@
  */
 
 namespace GuoJiangClub\EC\Open\Core\Discount\Contracts;
+
 use GuoJiangClub\Component\Discount\Contracts\DiscountContract;
 use GuoJiangClub\Component\Discount\Contracts\DiscountSubjectContract;
 use GuoJiangClub\Component\Discount\Contracts\RuleCheckerContract as BaseRuleCheckerContract;
+
 /**
  * Interface RuleCheckerContract.
  */

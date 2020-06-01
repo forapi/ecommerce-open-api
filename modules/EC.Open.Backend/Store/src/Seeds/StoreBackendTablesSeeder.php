@@ -3,7 +3,7 @@
 /*
  * This file is part of ibrand/distribution-backend.
  *
- * (c) 果酱社区 <https://guojiang.club>
+ * (c) GuoJiangClub <https://www.ibrand.cc>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -171,7 +171,28 @@ class StoreBackendTablesSeeder extends Seeder
                 'uri' => 'store/promotion/coupon',
                 'created_at' => date('Y-m-d H:i:s', time()),
                 'updated_at' => date('Y-m-d H:i:s', time()),
+            ],
+            [
+                'parent_id'  => $parent_discount,
+                'order'      => $lastOrder++,
+                'title'      => '多人拼团管理',
+                'icon'       => '',
+                'blank'      => 1,
+                'uri'        => 'store/promotion/multiGroupon',
+                'created_at' => date('Y-m-d H:i:s', time()),
+                'updated_at' => date('Y-m-d H:i:s', time()),
+            ],
+            [
+                'parent_id'  => $parent_discount,
+                'order'      => $lastOrder++,
+                'title'      => '砍价管理',
+                'icon'       => '',
+                'blank'      => 1,
+                'uri'        => 'store/promotion/reduce',
+                'created_at' => date('Y-m-d H:i:s', time()),
+                'updated_at' => date('Y-m-d H:i:s', time()),
             ]
+
         ];
         DB::table(config('admin.database.menu_table'))->insert($discount_menu_list);
 

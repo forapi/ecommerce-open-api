@@ -10,6 +10,7 @@ use Prettus\Repository\Criteria\RequestCriteria;
 use GuoJiangClub\EC\Open\Backend\Store\Model\Order;
 use GuoJiangClub\EC\Open\Backend\Store\Exceptions\GeneralException;
 use GuoJiangClub\EC\Open\Backend\Store\Model\ShippingMethod;
+use GuoJiangClub\Component\Discount\Models\Coupon;
 use DB;
 
 /**

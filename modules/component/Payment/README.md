@@ -1,1 +1,1 @@
-# iBrand Point Component
+# GuoJiangClub Point Component

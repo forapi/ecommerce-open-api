@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of ibrand/core.
+ * This file is part of ibrand/EC-Open-Core.
  *
  * (c) 果酱社区 <https://guojiang.club>
  *
@@ -15,19 +15,19 @@ use GuoJiangClub\Component\Discount\Contracts\AdjustmentContract;
 use GuoJiangClub\Component\Discount\Contracts\DiscountActionContract;
 use GuoJiangClub\Component\Discount\Contracts\DiscountContract;
 use GuoJiangClub\Component\Discount\Models\Rule;
-use GuoJiangClub\EC\Open\Core\Discount\Checkers\ContainsCategoryRuleChecker;
-use GuoJiangClub\EC\Open\Core\Discount\Checkers\ContainsProductRuleChecker;
-use GuoJiangClub\EC\Open\Core\Discount\Contracts\DiscountItemContract;
+use GuoJiangClub\Core\Discount\Checkers\ContainsCategoryRuleChecker;
+use GuoJiangClub\Core\Discount\Checkers\ContainsProductRuleChecker;
+use GuoJiangClub\Core\Discount\Contracts\DiscountItemContract;
 
 /**
- * Class DiscountUnitActionContract
- * @package iBrand\Core\Discount\Actions
+ * Class DiscountUnitActionContract.
  */
-abstract class DiscountUnitActionContract  implements DiscountActionContract
+abstract class DiscountUnitActionContract implements DiscountActionContract
 {
     /**
      * @param DiscountItemContract $subjectItem
-     * @param DiscountContract $discount
+     * @param DiscountContract     $discount
+     *
      * @return bool
      */
     public function checkItemRule(DiscountItemContract $subjectItem, DiscountContract $discount)
@@ -47,7 +47,8 @@ abstract class DiscountUnitActionContract  implements DiscountActionContract
 
     /**
      * @param DiscountItemContract $subjectItem
-     * @param Rule $rule
+     * @param Rule                 $rule
+     *
      * @return mixed
      */
     protected function isEligibleToRule(DiscountItemContract $subjectItem, Rule $rule)
@@ -62,13 +63,14 @@ abstract class DiscountUnitActionContract  implements DiscountActionContract
     /**
      * @param DiscountContract $discount
      * @param $amount
+     *
      * @return mixed
      */
     protected function createAdjustment(DiscountContract $discount, $amount)
     {
         $adjustment = app(AdjustmentContract::class);
 
-        $originType =$discount->isCouponBased() ? 'coupon' : 'discount';
+        $originType = $discount->isCouponBased() ? 'coupon' : 'discount';
 
         return  $adjustment->createNew(AdjustmentContract::ORDER_ITEM_DISCOUNT_ADJUSTMENT, $discount->label, $amount, $discount->id, $originType);
     }

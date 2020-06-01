@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of ibrand/core.
+ * This file is part of ibrand/EC-Open-Core.
  *
  * (c) 果酱社区 <https://guojiang.club>
  *
@@ -24,7 +24,7 @@ class UnitPercentageDiscountAction extends DiscountUnitActionContract
         foreach ($subject->getItems() as $item) {
             if ($this->checkItemRule($item->getModel(), $discount)) { //只有符合规则的商品才能获得积分
                 $discountAmount = -1 * (int) round($item->total * (1 - $configuration['percentage'] / 100));
-                $adjustment = $this->createAdjustment($discount,$discountAmount);
+                $adjustment = $this->createAdjustment($discount, $discountAmount);
                 $adjustment->order_item_id = $item->id;
                 $subject->addAdjustment($adjustment);
 
@@ -63,7 +63,6 @@ class UnitPercentageDiscountAction extends DiscountUnitActionContract
             }*/
         }
     }
-
 
     public function calculate(DiscountSubjectContract $subject, array $configuration, DiscountContract $discount)
     {
@@ -111,8 +110,9 @@ class UnitPercentageDiscountAction extends DiscountUnitActionContract
 
     /**
      * @param DiscountSubjectContract $subject
-     * @param array $configuration
-     * @param DiscountContract $discount
+     * @param array                   $configuration
+     * @param DiscountContract        $discount
+     *
      * @deprecated
      */
     public function combinationCalculate(DiscountSubjectContract $subject, array $configuration, DiscountContract $discount)

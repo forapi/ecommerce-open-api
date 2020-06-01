@@ -1,9 +1,9 @@
 {
   "name": "ibrand/balance",
   "type": "library",
-  "description": "iBrand Balance component",
+  "description": "GuoJiangClub Balance component",
   "keywords": [
-    "iBrand",
+    "GuoJiangClub",
     "Balance",
     "component"
   ],
@@ -11,7 +11,7 @@
   "authors": [
     {
       "name": "shjchen",
-      "email": "ibrand.shjchen@foxmail.com"
+      "email": "i@chenhow.com"
     }
   ],
   "require": {

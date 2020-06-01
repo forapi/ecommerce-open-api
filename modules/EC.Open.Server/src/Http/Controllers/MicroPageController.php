@@ -12,11 +12,11 @@
 namespace GuoJiangClub\EC\Open\Server\Http\Controllers;
 
 use Carbon\Carbon;
+use DB;
 use GuoJiangClub\Component\Advert\Models\MicroPage;
 use GuoJiangClub\Component\Advert\Models\MicroPageAdvert;
 use GuoJiangClub\Component\Advert\Repositories\AdvertItemRepository;
 use GuoJiangClub\Component\Product\Repositories\GoodsRepository;
-use DB;
 
 class MicroPageController extends Controller
 {
@@ -30,9 +30,7 @@ class MicroPageController extends Controller
                                 microPageAdvert $microPageAdvert,
                                 AdvertItemRepository $advertItemRepository,
                                 GoodsRepository $goodsRepository
-
-    )
-    {
+    ) {
         $this->microPage = $microPage;
 
         $this->microPageAdvert = $microPageAdvert;
@@ -57,34 +55,34 @@ class MicroPageController extends Controller
                 $microPage = $this->microPage->where('code', $code)->first();
         }
 
-        if (!$microPage) return $this->success();
+        if (!$microPage) {
+            return $this->success();
+        }
 
         $microPageAdverts = $this->microPageAdvert->where('micro_page_id', $microPage->id)
             ->with(['advert' => function ($query) {
-
                 return $query = $query->where('status', 1);
             }])
             ->orderBy('sort')->get();
 
         if ($microPageAdverts->count()) {
-
             $i = 0;
 
             foreach ($microPageAdverts as $key => $item) {
-
                 $associate_with = [];
 
                 if ($item->advert_id > 0) {
-
                     $data['pages'][$i]['name'] = $item->advert->type;
 
                     $data['pages'][$i]['title'] = $item->advert->title;
 
                     $data['pages'][$i]['is_show_title'] = $item->advert->is_show_title;
 
+                    if ('micro_page_componet_groupon' == $item->advert->type) {
+                        $associate_with = ['goods'];
+                    }
 
                     if (stristr($item->advert->type, 'componet_cube')) {
-
                         $data['pages'][$i]['name'] = 'micro_page_componet_cube';
 
                         $cube_type = '1_1';
@@ -94,33 +92,25 @@ class MicroPageController extends Controller
                         $len = count($arr);
 
                         if (is_numeric($arr[$len - 1])) {
-
-                            $cube_type = $arr[$len - 2] . '_' . $arr[$len - 1];
+                            $cube_type = $arr[$len - 2].'_'.$arr[$len - 1];
                         }
 
                         $data['pages'][$i]['type'] = $cube_type;
-
                     }
 
                     $advertItem = $this->getAdvertItem($item->advert->code, $associate_with);
 
                     $data['pages'][$i]['value'] = array_values($advertItem);
-
-
                 }
 
-                if ($item->advert_id == -1) {
-
+                if (-1 == $item->advert_id) {
                     $data['pages'][$i]['name'] = 'micro_page_componet_search';
 
                     $data['pages'][$i]['value'] = null;
                 }
 
-                $i++;
-
-
+                ++$i;
             }
-
         }
 
         $data['server_time'] = Carbon::now()->toDateTimeString();
@@ -130,25 +120,22 @@ class MicroPageController extends Controller
         return $this->success($data);
     }
 
-
     public function getAdvertItem($code, $associate_with)
-
     {
         $advertItem = $this->advertItemRepository->getItemsByCode($code, $associate_with);
 
         $time = Carbon::now()->toDateTimeString();
 
         if ($advertItem->count()) {
-
             $filtered = $advertItem->filter(function ($item) use ($time) {
-
-                if (!$item->associate AND $item->associate_id) return [];
+                if (!$item->associate and $item->associate_id) {
+                    return [];
+                }
 
                 switch ($item->associate_type) {
                     case 'discount':
 
-                        if ($item->associate->status == 1 AND $item->associate->ends_at > $time) {
-
+                        if (1 == $item->associate->status and $item->associate->ends_at > $time) {
                             return $item;
                         }
 
@@ -160,12 +147,12 @@ class MicroPageController extends Controller
 
                         $category_id = $item->associate_id;
 
-                        $categoryGoodsIds = DB::table($prefix . 'goods_category')
+                        $categoryGoodsIds = DB::table($prefix.'goods_category')
                             ->where('category_id', $category_id)
                             ->select('goods_id')->distinct()->get()
                             ->pluck('goods_id')->toArray();
 
-                        $goodsList = DB::table($prefix . 'goods')
+                        $goodsList = DB::table($prefix.'goods')
                             ->whereIn('id', $categoryGoodsIds)
                             ->where('is_del', 0)
 //                            ->orderBy('sort', 'desc')
@@ -180,17 +167,12 @@ class MicroPageController extends Controller
                     default:
 
                         return $item;
-
                 }
-
             });
 
             return $filtered->all();
         }
 
         return $advertItem;
-
     }
-
-
 }

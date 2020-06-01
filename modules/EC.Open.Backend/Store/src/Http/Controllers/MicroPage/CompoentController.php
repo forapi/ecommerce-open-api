@@ -10,6 +10,7 @@ use Encore\Admin\Layout\Content;
 use GuoJiangClub\Component\Advert\Models\MicroPageAdvert;
 use GuoJiangClub\Component\Advert\Models\Advert;
 use GuoJiangClub\Component\Advert\Models\AdvertItem;
+use GuoJiangClub\Component\MultiGroupon\Models\MultiGroupon;
 use GuoJiangClub\Component\Advert\Repositories\AdvertRepository;
 use GuoJiangClub\Component\Advert\Repositories\AdvertItemRepository;
 use GuoJiangClub\EC\Open\Backend\Store\Repositories\GoodsRepository;
@@ -41,7 +42,8 @@ class CompoentController extends Controller
                                 CategoryRepository $categoryRepository,
                                 MicroPageRepository $microPageRepository,
                                 DiscountRepository $discountRepository,
-                                Advert $advert
+                                Advert $advert,
+                                MultiGroupon $groupon
 
 
     )
@@ -59,6 +61,8 @@ class CompoentController extends Controller
         $this->discountRepository = $discountRepository;
 
         $this->advert = $advert;
+
+        $this->groupon = $groupon;
 
     }
 
@@ -617,5 +621,51 @@ class CompoentController extends Controller
 
         return view('store-backend::micro_page.compoent.common.model.images');
     }
+
+
+
+
+    public function getGrouponsData()
+    {
+        $groupons = $this->groupon
+            ->where('status', 1)->where('ends_at', '>=', Carbon::now())
+            ->whereHas('goods', function ($query) {
+
+                $query = $query->where('is_del',0);
+
+                if (request('title')) {
+                    return $query = $query->where('name', 'like', '%' . request('title') . '%');
+                } else {
+                    return $query;
+                }
+            })
+            ->with('goods')
+            ->orderBy('sort', 'desc')
+            ->paginate(5);
+
+        return view('store-backend::micro_page.compoent.common.grouponsList', compact('groupons'));
+    }
+
+    public function modelGroupons()
+    {
+        $groupons = $this->groupon
+            ->where('status', 1)->where('ends_at', '>=', Carbon::now())
+            ->whereHas('goods', function ($query) {
+                return $query = $query->where('is_del',0);
+
+            })
+            ->with('goods')
+            ->orderBy('sort', 'desc')
+            ->paginate(5);
+
+        $groupons_ = null;
+
+        if (request('groupon_id')) {
+
+            $groupons_ = $this->groupon->where('id', request('groupon_id'))->first();
+        }
+        return view('store-backend::micro_page.compoent.common.model.groupons', compact('groupons', 'groupons_'));
+    }
+
 
 }

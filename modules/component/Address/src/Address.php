@@ -25,12 +25,13 @@ class Address extends Model
 
     /**
      * Address constructor.
+     *
      * @param array $attributes
      */
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
 
-        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_') . 'addresses');
+        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'addresses');
     }
 }

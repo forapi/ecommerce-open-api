@@ -1,9 +1,18 @@
 <?php
 
+/*
+ * This file is part of ibrand/EC-Open-Core.
+ *
+ * (c) 果酱社区 <https://guojiang.club>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GuoJiangClub\EC\Open\Core\Applicators;
 
-use GuoJiangClub\Component\Order\Models\Adjustment;
 use GuoJiangClub\Component\Discount\Distributors\PercentageIntegerDistributor;
+use GuoJiangClub\Component\Order\Models\Adjustment;
 use GuoJiangClub\Component\Order\Models\Order;
 use GuoJiangClub\Component\Point\Repository\PointRepository;
 
@@ -12,8 +21,7 @@ class PointApplicator
     private $distributor;
     private $point;
 
-    public function __construct(PercentageIntegerDistributor $distributor
-        , PointRepository $pointRepository)
+    public function __construct(PercentageIntegerDistributor $distributor, PointRepository $pointRepository)
     {
         $this->distributor = $distributor;
         $this->point = $pointRepository;
@@ -27,12 +35,12 @@ class PointApplicator
             'type' => 'order_point_discount',
             'label' => '使用积分',
             'origin_type' => 'point',
-            'origin_id' => $uid
+            'origin_id' => $uid,
         ]);
 
         $amount = (-1) * $point * config('ibrand.app.point.order_proportion');
 
-        if ($amount == 0) {
+        if (0 == $amount) {
             return;
         }
 
@@ -57,8 +65,7 @@ class PointApplicator
             'value' => (-1) * $point,
             'valid_time' => 0,
             'item_type' => Order::class,
-            'item_id' => $order->id
+            'item_id' => $order->id,
         ]);
     }
-
 }

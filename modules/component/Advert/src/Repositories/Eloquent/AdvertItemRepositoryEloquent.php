@@ -11,11 +11,11 @@
 
 namespace GuoJiangClub\Component\Advert\Repositories\Eloquent;
 
+use DB;
 use GuoJiangClub\Component\Advert\Models\AdvertItem;
 use GuoJiangClub\Component\Advert\Repositories\AdvertItemRepository;
 use Prettus\Repository\Eloquent\BaseRepository;
 use Prettus\Repository\Traits\CacheableRepository;
-use DB;
 
 class AdvertItemRepositoryEloquent extends BaseRepository implements AdvertItemRepository
 {
@@ -33,8 +33,10 @@ class AdvertItemRepositoryEloquent extends BaseRepository implements AdvertItemR
 
     /**
      * @param array $attributes
-     * @param int $parentId
+     * @param int   $parentId
+     *
      * @return mixed
+     *
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     public function create(array $attributes, $parentId = 0)
@@ -46,10 +48,8 @@ class AdvertItemRepositoryEloquent extends BaseRepository implements AdvertItemR
         return parent::create($attributes);
     }
 
-
-    public function getItemsByCode($code,$associate_with = [],$depth = 0, $status = 1)
+    public function getItemsByCode($code, $associate_with = [], $depth = 0, $status = 1)
     {
-
         $advert = $this->whereHas('advert', function ($query) use ($code,$status) {
             return $query->where('code', $code)->where('status', $status);
         })->first();
@@ -60,13 +60,10 @@ class AdvertItemRepositoryEloquent extends BaseRepository implements AdvertItemR
 
         $query = $this->model->with('associate');
 
-        if (count($associate_with)>0) {
-
-            foreach ($associate_with as $with){
-
+        if (count($associate_with) > 0) {
+            foreach ($associate_with as $with) {
                 $query = $query->with('associate.'.$with);
             }
-
         }
 
         $query = $query->where('advert_id', $advert->advert_id)
@@ -83,7 +80,5 @@ class AdvertItemRepositoryEloquent extends BaseRepository implements AdvertItemR
         }
 
         return $query->toTree();
-
-
     }
 }

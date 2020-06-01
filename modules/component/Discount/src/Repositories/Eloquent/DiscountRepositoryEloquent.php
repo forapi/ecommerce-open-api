@@ -57,4 +57,46 @@ class DiscountRepositoryEloquent extends BaseRepository implements DiscountRepos
                     });
             })->with('rules', 'actions')->get();
     }
+
+    /**
+     * 获取可领取优惠券列表/促销优惠活动.
+     *
+     * @param int $is_coupon
+     * @param int $channel
+     * @param int $limit
+     *
+     * @return mixed
+     */
+    public function getDiscountByType($is_coupon = 1, $channel = 'ec', $limit = 10, $is_agent_share = null)
+    {
+        //->where('channel', $channel)
+        $query = $this->model->where('status', 1)->where('coupon_based', $is_coupon);
+
+        /*if ($is_agent_share) {
+            $query = $query->where('is_agent_share', 1);
+            ->whereHas('hasAgents', function ($query) use ($is_agent_share) {
+                $query->where('agent_id', $is_agent_share->id)
+                    ->orWhere('agent_id', 0);
+            })
+        } else {
+            $query = $query->where('is_open', 1);
+        }*/
+
+        $query = $query
+            ->where(function ($query) {
+                $query->whereNull('starts_at')
+                    ->orWhere(function ($query) {
+                        $query->where('starts_at', '<', Carbon::now());
+                    });
+            })
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere(function ($query) {
+                        $query->where('ends_at', '>', Carbon::now());
+                    });
+            })
+            ->with('rules', 'actions');
+
+        return $query->paginate($limit);
+    }
 }

@@ -208,7 +208,8 @@
                                                     <option value="store_detail" @if($item->type=='store_detail') selected  @endif    data-page="/pages/store/detail/detail?id=">商品详情页</option>
                                                     <option value="store_list"   @if($item->type=='store_list') selected  @endif  data-page="/pages/store/list/list?c_id=">商品分类页</option>
                                                     {{--<option value="store_seckill" @if($item->type=='store_seckill') selected  @endif data-page="/pages/store/seckill/seckill">秒杀列表页</option>--}}
-                                                    {{--<option value="store_groups"  @if($item->type=='store_groups') selected  @endif  data-page="/pages/store/groups/groups">拼团列表页</option>--}}
+                                                    <option value="store_groups"  @if($item->type=='store_groups') selected  @endif  data-page="/pages/store/groups/groups">拼团列表页</option>
+                                                    <option value="store_reduce"  @if($item->type=='store_reduce') selected  @endif  data-page="/pages/bargain/index/index">砍价列表页</option>
                                                     {{--<option value="store_callList"  @if($item->type=='store_callList') selected  @endif  data-page="/pages/store/callList/callList">集CALL列表页</option>--}}
                                                     {{--<option value="store_mealList"  @if($item->type=='store_mealList') selected  @endif data-page="/pages/store/mealList/mealList">套餐列表页</option>--}}
                                                     <option value="other_micro" @if($item->type=='other_micro') selected  @endif data-page="/pages/index/microPages/microPages?id=">微页面</option>
@@ -273,6 +274,7 @@
                                 </a>
                             </li>
                             <p style="margin-left: -35px;">*拖动可更改图片位置</p>
+                            <p style="margin-left: -35px;">*如页面不跳转,链接请选择自定义,填0</p>
                             <p style="margin-left: -35px;">*建议图片尺寸110*110像素</p>
                         </ul>
 

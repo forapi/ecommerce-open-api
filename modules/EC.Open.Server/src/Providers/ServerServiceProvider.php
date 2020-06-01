@@ -39,6 +39,6 @@ class ServerServiceProvider extends ServiceProvider
 
         $this->app->register(RouteServiceProvider::class);
 
-        //$this->app->make('iBrand\Scheduling\ScheduleList')->add(OrderRemindSchedule::class);
+        $this->app->make('iBrand\Scheduling\ScheduleList')->add(OrderRemindSchedule::class);
     }
 }

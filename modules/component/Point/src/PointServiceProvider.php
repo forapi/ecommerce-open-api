@@ -11,7 +11,6 @@
 
 namespace GuoJiangClub\Component\Point;
 
-use Event;
 use GuoJiangClub\Component\Point\Repository\Eloquent\PointRepositoryEloquent;
 use GuoJiangClub\Component\Point\Repository\PointRepository;
 use Illuminate\Support\ServiceProvider;
@@ -26,9 +25,7 @@ class PointServiceProvider extends ServiceProvider
                 __DIR__.'/../migrations/create_point_tables.php.sub' => database_path()."/migrations/{$timestamp}_create_point_tables.php",
             ], 'migrations');
         }
-
     }
-
 
     public function register()
     {

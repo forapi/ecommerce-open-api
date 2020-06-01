@@ -20,16 +20,19 @@ interface RepositoryContract extends RepositoryInterface
 {
     /**
      * get category ids by some id.
+     *
      * @param $categoryId
      * @param bool $excludeSelf
+     *
      * @return mixed
      */
-
     public function getSubIdsById($categoryId, $excludeSelf = false);
 
     /**
      * get all categories.
+     *
      * @param int $depth
+     *
      * @return mixed
      */
     public function getCategories($depth = 0);
@@ -37,8 +40,8 @@ interface RepositoryContract extends RepositoryInterface
     /**
      * @param $catKeyword
      * @param int $depth
+     *
      * @return mixed
      */
     public function getSubCategoriesByNameOrId($catKeyword, $depth = 0);
-
 }

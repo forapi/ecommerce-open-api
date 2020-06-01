@@ -24,14 +24,13 @@ class MicroPageAdvert extends Model
      */
     public function __construct(array $attributes = [])
     {
-
         $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'micro_page_advert');
 
         parent::__construct($attributes);
     }
 
-    public function advert(){
-
-        return $this->belongsTo(Advert::class,'advert_id');
+    public function advert()
+    {
+        return $this->belongsTo(Advert::class, 'advert_id');
     }
 }

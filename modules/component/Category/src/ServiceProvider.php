@@ -23,12 +23,10 @@ class ServiceProvider extends LaravelServicePorvider
         if (!class_exists('CreateCategoryTables')) {
             $timestamp = date('Y_m_d_His', time());
             $this->publishes([
-                __DIR__ . '/../migrations/create_category_tables.php.stub' =>
-                    database_path() . "/migrations/{$timestamp}_create_category_tables.php",
+                __DIR__.'/../migrations/create_category_tables.php.stub' => database_path()."/migrations/{$timestamp}_create_category_tables.php",
             ], 'migrations');
         }
     }
-
 
     /**
      * Register the service provider.

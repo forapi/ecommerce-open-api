@@ -22,5 +22,5 @@ interface AdvertRepository extends RepositoryInterface
      *
      * @return mixed
      */
-    public function getByCode($code,$status=1);
+    public function getByCode($code, $status = 1);
 }

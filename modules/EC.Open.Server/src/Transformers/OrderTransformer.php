@@ -11,6 +11,9 @@
 
 namespace GuoJiangClub\EC\Open\Server\Transformers;
 
+use Carbon\Carbon;
+use GuoJiangClub\Component\Shipping\Models\Shipping;
+
 class OrderTransformer extends BaseTransformer
 {
     protected $type;
@@ -39,13 +42,13 @@ class OrderTransformer extends BaseTransformer
                 break;
         }
 
-        /*$model->adjustment_point = 0;
-        if ($model->getTable() == 'el_order' AND $point = $model->adjustments->where('origin_type', 'point')->first() AND settings('point_proportion')) {
+        $model->adjustment_point = 0;
+        if ($point = $model->adjustments->where('origin_type', 'point')->first() AND settings('point_proportion')) {
             $model->adjustment_point = -$point->amount / settings('point_proportion');
         }
 
         if ($model->pay_status == 0) {
-            $close_time_limit = settings('order_auto_cancel_time') * 60;
+            $close_time_limit = (settings('order_auto_cancel_time')?settings('order_auto_cancel_time'):30) * 60;
             $create_time = strtotime($model->created_at);
             $model->will_closed_at = date('Y-m-d H:i:s', $create_time + $close_time_limit);
         }
@@ -110,7 +113,7 @@ class OrderTransformer extends BaseTransformer
                     $model->can_refund = false;
                 }
             }
-        }*/
+        }
 
         return $model->toArray();
     }

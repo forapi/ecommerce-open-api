@@ -1,9 +1,9 @@
 {
   "name": "ibrand/payment",
   "type": "library",
-  "description": "iBrand payment component",
+  "description": "GuoJiangClub payment component",
   "keywords": [
-    "iBrand",
+    "GuoJiangClub",
     "payment",
     "component"
   ],
@@ -11,7 +11,7 @@
   "authors": [
     {
       "name": "shjchen",
-      "email": "ibrand.shjchen@foxmail.com"
+      "email": "i@chenhow.com"
     }
   ],
   "require": {

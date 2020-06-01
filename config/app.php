@@ -180,17 +180,6 @@ return [
 
         Prettus\Repository\Providers\RepositoryServiceProvider::class,
         HieuLe\Active\ActiveServiceProvider::class,
-
-        iBrand\Component\Pay\PayServiceProvider::class,
-        iBrand\Backend\BackendServiceProvider::class,
-
-        GuoJiangClub\EC\Open\Core\Providers\AppServiceProvider::class,
-        GuoJiangClub\EC\Open\Server\Providers\ServerServiceProvider::class,
-
-        GuoJiangClub\EC\Open\Backend\Album\Providers\AlbumBackendServiceProvider::class,
-        GuoJiangClub\EC\Open\Backend\Member\Providers\BackendServiceProvider::class,
-        GuoJiangClub\EC\Open\Backend\Store\Providers\BackendServiceProvider::class,
-
         /*
          * Application Service Providers...
          */
@@ -200,6 +189,19 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        iBrand\Component\Pay\PayServiceProvider::class,
+
+        GuoJiangClub\EC\Open\Core\Providers\AppServiceProvider::class,
+        GuoJiangClub\EC\Open\Server\Providers\ServerServiceProvider::class,
+
+        GuoJiangClub\EC\Open\Backend\Album\Providers\AlbumBackendServiceProvider::class,
+        GuoJiangClub\EC\Open\Backend\Member\Providers\BackendServiceProvider::class,
+        GuoJiangClub\EC\Open\Backend\Store\Providers\BackendServiceProvider::class,
+        GuoJiangClub\Distribution\Backend\Providers\DistributionBackendProvider::class,
+        GuoJiangClub\Distribution\Core\Providers\DistributionCoreServiceProvider::class,
+        GuoJiangClub\Distribution\Server\Providers\DistributionServiceProvider::class,
+
+        //GuoJiangClub\EC\Custom\Demo\DemoServiceProvider::class,
     ],
 
     /*
@@ -252,8 +254,6 @@ return [
 
         'Charge'=> iBrand\Component\Pay\Facades\Charge::class,
         'PayNotify' => iBrand\Component\Pay\Facades\PayNotify::class,
-
-        "BackendMenu"=> iBrand\Backend\Facades\Menu::class,
     ],
 
 ];

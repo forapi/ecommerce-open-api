@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of ibrand/EC-Open-Core.
+ *
+ * (c) 果酱社区 <https://guojiang.club>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GuoJiangClub\EC\Open\Core\Listeners;
 
 use Carbon\Carbon;
@@ -10,10 +19,9 @@ use GuoJiangClub\EC\Open\Core\Jobs\AutoCancelOrder;
 
 class OrderEventListener
 {
-
     protected $listens = [
         'order.paid' => 'onOrderPaid',
-        'order.submitted' => 'onOrderSubmitted'
+        'order.submitted' => 'onOrderSubmitted',
     ];
 
     protected $point;
@@ -23,10 +31,9 @@ class OrderEventListener
         $this->point = $pointRepository;
     }
 
-    public function onOrderSubmitted(Order $order){
-
-        if ($order->status == Order::STATUS_NEW) {
-
+    public function onOrderSubmitted(Order $order)
+    {
+        if (Order::STATUS_NEW == $order->status) {
             $delayTime = config('ibrand.app.order_auto_cancel');
 
             $job = (new AutoCancelOrder($order))
@@ -49,13 +56,7 @@ class OrderEventListener
                 continue;
             }//该订单已经存在积分值
 
-            $this->point->create(['user_id' => $order->user_id
-                , 'action' => 'order_item'
-                , 'note' => '购物送积分'
-                , 'value' => $orderItem->total / 100
-                , 'status' => 0
-                , 'item_type' => OrderItem::class
-                , 'item_id' => $orderItem->id
+            $this->point->create(['user_id' => $order->user_id, 'action' => 'order_item', 'note' => '购物送积分', 'value' => $orderItem->total / 100, 'status' => 0, 'item_type' => OrderItem::class, 'item_id' => $orderItem->id,
             ]);
         }
     }
@@ -63,8 +64,7 @@ class OrderEventListener
     public function subscribe($events)
     {
         foreach ($this->listens as $event => $listener) {
-            $events->listen($event, __CLASS__ . '@' . $listener);
+            $events->listen($event, __CLASS__.'@'.$listener);
         }
     }
-
 }

@@ -15,6 +15,7 @@ use GuoJiangClub\Component\Discount\Repositories\CouponRepository;
 use GuoJiangClub\Component\Discount\Repositories\DiscountRepository;
 use GuoJiangClub\EC\Open\Core\Services\DiscountService;
 use GuoJiangClub\EC\Open\Server\Transformers\CouponTransformer;
+use GuoJiangClub\Component\Discount\Models\Discount;
 
 class CouponController extends Controller
 {
@@ -24,8 +25,7 @@ class CouponController extends Controller
 
     public function __construct(
         CouponRepository $couponRepository, DiscountService $discountService, DiscountRepository $discountRepository
-    )
-    {
+    ) {
         $this->couponRepository = $couponRepository;
         $this->discountService = $discountService;
         $this->discountRepository = $discountRepository;
@@ -67,7 +67,7 @@ class CouponController extends Controller
 
         $ruleType = request('rule_type');
 
-        if ($ruleType == 'cart_quantity') {
+        if ('cart_quantity' == $ruleType) {
             $ruleData = ['count' => request('rule_value')];
         } else {
             $ruleData = ['amount' => request('rule_value')];
@@ -75,7 +75,7 @@ class CouponController extends Controller
 
         $actionType = request('action_type');
 
-        if ($actionType == 'order_fixed_discount') {
+        if ('order_fixed_discount' == $actionType) {
             $actionData = ['amount' => request('action_value')];
         } else {
             $actionData = ['percentage' => request('action_value')];
@@ -91,12 +91,14 @@ class CouponController extends Controller
     {
         $discount = $this->discountRepository->find(request('discount_id'));
 
-        if(!$discount->coupon_based){
+        if (!$discount->coupon_based) {
             return $this->failed('非优惠券，无法领取');
         }
 
-        $coupon = $this->couponRepository->create(['discount_id'=>request('discount_id'),'user_id'=>request()->user()->id,
-            'code'=>uniqid()]);
+        $coupon = $this->couponRepository->create(['discount_id' => request('discount_id'), 'user_id' => request()->user()->id,
+            'code' => uniqid(), ]);
+
+        Discount::where('id',request('discount_id'))->increment('used');
 
         return $this->success($coupon);
     }

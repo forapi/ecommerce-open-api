@@ -17,4 +17,7 @@
     <li @if($type=='micro_page_componet_goods_group')class="active"@endif>
         <a href="{{route('admin.setting.micro.page.compoent.index','micro_page_componet_goods_group')}}">商品分组</a>
     </li>
+    <li @if($type=='micro_page_componet_groupon')class="active"@endif>
+        <a href="{{route('admin.setting.micro.page.compoent.index','micro_page_componet_groupon')}}">拼团</a>
+    </li>
 </ul>

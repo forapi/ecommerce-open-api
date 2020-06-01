@@ -30,6 +30,12 @@ class Balance extends Model
         $this->setTable($prefix.'balance');
     }
 
+
+    public function scopeSumByUser($query,$userId)
+    {
+        return $query->where('user_id',$userId)->sum('value');
+    }
+
     public static function getBalanceByUserId($userId)
     {
         $sum = self::where('user_id', $userId)->sum('value');

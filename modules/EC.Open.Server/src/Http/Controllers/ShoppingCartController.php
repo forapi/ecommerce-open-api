@@ -87,7 +87,7 @@ class ShoppingCartController extends Controller
             } else {
                 Cart::remove($item->rawId());
 
-                return $this->failed( '商品库存不足,请重新选择');
+                return $this->failed('商品库存不足,请重新选择');
             }
 
             Cart::update($item->rawId(), ['status' => 'online', 'market_price' => $item->model->market_price, 'channel' => 'normal']);

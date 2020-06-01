@@ -180,6 +180,7 @@
                                 </a>
                             </li>
                             <p style="margin-left: -35px;">*拖动可更改图片位置</p>
+                            <p style="margin-left: -35px;">*如页面不跳转,链接请选择自定义,填0</p>
                             <p style="margin-left: -35px;">*建议图片尺寸110*110像素</p>
                         </ul>
 

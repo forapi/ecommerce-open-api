@@ -11,7 +11,10 @@
 
 namespace GuoJiangClub\EC\Open\Server\Transformers;
 
+use DB;
 use GuoJiangClub\Component\Order\Repositories\CommentRepository;
+use GuoJiangClub\Distribution\Core\Models\Agent;
+use GuoJiangClub\Distribution\Server\Services\AgentsService;
 
 class GoodsTransformer extends BaseTransformer
 {
@@ -40,12 +43,40 @@ class GoodsTransformer extends BaseTransformer
         $tags = explode(',', $model->tags);
 
         $model->tags = '' == $tags[0] ? [] : $tags;
+        $goods = $model->toArray();
+        $goods['is_agent_goods'] = false;
 
-        if ('list' == $this->type) {
-            return array_except($model->toArray(), self::$excludeable);
+        if ('detail' == $this->type) {
+            $goods['shop_hidden_more_info'] = env('SHOP_HIDDEN_MORE_INFO') ? 1 : 0;
+            $goods['shop_show_sell_nums'] = settings('shop_show_sell_nums') ? 1 : 0;
+            $distribution_status = settings('distribution_status');
+            $goods['can_share'] = false;
+            $goods['agent_code'] = '';
+            if ($distribution_status) {
+                $search = DB::table('el_agent_goods')->where('goods_id', $goods['id'])->first();
+                if ($search and 1 == $search->activity) {
+                    $goods['is_agent_goods'] = true;
+
+                    if ($user = auth('api')->user() and $agent = Agent::where(['status' => 1, 'user_id' => $user->id])->first()) {
+                        $goods['can_share'] = true;
+                        $goods['agent_code'] = $agent->code;
+                        $goods['commission'] = app(AgentsService::class)->getCommissionByGoodsID($model);
+
+                        /*猫大不显示佣金*/
+                        $goods['show_commission'] = true;
+                        if (env('MAODA_COMMISSION')) {
+                            $goods['show_commission'] = false;
+                        }
+                    }
+                }
+            }
         }
 
-        return $model->toArray();
+        if ('list' == $this->type) {
+            return array_except($goods, self::$excludeable);
+        }
+
+        return $goods;
     }
 
     public function includePhotos($model)

@@ -12,6 +12,9 @@ $router->group(['prefix' => 'admin/store'], function () use ($router) {
     $router->post('upload/uploadExcelFile', 'ImageController@uploadExcelFile')->name('upload.uploadExcelFile');
 
     $router->group(['prefix' => 'setting'], function () use ($router) {
+        $router->get('refund-reason', 'SystemSettingController@refundReason')->name('admin.setting.refund.reason');
+        $router->post('saveRefundSettings', 'SystemSettingController@saveRefundSettings')->name('admin.setting.saveRefundSettings');
+
         $router->group(['prefix' => 'micro/page','namespace' => 'MicroPage'], function () use ($router) {
             $router->get('/', 'MicroPageController@index')->name('admin.setting.micro.page.index');
             $router->get('/store', 'MicroPageController@store')->name('admin.setting.micro.page.store');
@@ -31,10 +34,12 @@ $router->group(['prefix' => 'admin/store'], function () use ($router) {
             $router->get('/model/categorys', 'CompoentController@modelCategorys')->name('admin.setting.micro.page.compoent.model.categorys');
             $router->get('/model/pages', 'CompoentController@modelPages')->name('admin.setting.micro.page.compoent.model.pages');
             $router->get('/model/images', 'CompoentController@modelImages')->name('admin.setting.micro.page.compoent.model.images');
+            $router->get('/model/groupons', 'CompoentController@modelGroupons')->name('admin.setting.micro.page.compoent.model.groupons');
             $router->get('compoent/getGoodsData', 'CompoentController@getGoodsData')->name('admin.setting.micro.page.compoent.getGoodsData');
             $router->get('compoent/getPagesData', 'CompoentController@getPagesData')->name('admin.setting.micro.page.compoent.getPagesData');
             $router->get('compoent/getCategorysData', 'CompoentController@getCategorysData')->name('admin.setting.micro.page.compoent.getCategorysData');
             $router->get('compoent/getCouponsData', 'CompoentController@getCouponsData')->name('admin.setting.micro.page.compoent.getCouponsData');
+            $router->get('compoent/getGrouponsData', 'CompoentController@getGrouponsData')->name('admin.setting.micro.page.compoent.getGrouponsData');
 
             $router->group(['prefix' => 'compoent/'], function () use ($router) {
                 $router->get('/', 'CompoentController@index')->name('admin.setting.micro.page.compoent.index');
@@ -185,6 +190,42 @@ $router->group(['prefix' => 'admin/store/promotion'], function () use ($router) 
         $router->post('export/excelExport', 'PublicController@excelExport')->name('admin.promotion.excelExport');
         $router->get('export/download/{url}', 'PublicController@download')->name('admin.promotion.download');
     });
+
+
+    //多人拼团
+    $router->group(['prefix' => 'multiGroupon'], function () use ($router) {
+        $router->get('/', 'MultiGrouponController@index')->name('admin.promotion.multiGroupon.index');
+        $router->get('create', 'MultiGrouponController@create')->name('admin.promotion.multiGroupon.create');
+        $router->get('edit/{id}', 'MultiGrouponController@edit')->name('admin.promotion.multiGroupon.edit');
+        $router->post('store', 'MultiGrouponController@store')->name('admin.promotion.multiGroupon.store');
+        $router->get('getSpuModal', 'MultiGrouponController@getSpuModal')->name('admin.promotion.multiGroupon.getSpuModal');
+        $router->post('getSpuData', 'MultiGrouponController@getSpuData')->name('admin.promotion.multiGroupon.getSpuData');
+        $router->post('update', 'MultiGrouponController@update')->name('admin.promotion.multiGroupon.update');
+        $router->post('delete/{id}', 'MultiGrouponController@delete')->name('admin.promotion.multiGroupon.delete');
+        $router->get('grouponItemList/{id}', 'MultiGrouponController@grouponItemList')->name('admin.promotion.multiGroupon.grouponItemList');
+        $router->get('getRefundModal', 'MultiGrouponController@getRefundModal')->name('admin.promotion.multiGroupon.getRefundModal');
+        $router->get('getRefundItemsPaginate', 'MultiGrouponController@getRefundItemsPaginate')->name('admin.promotion.multiGroupon.getRefundItemsPaginate');
+        $router->get('getRefundList', 'MultiGrouponController@getRefundList')->name('admin.promotion.multiGroupon.getRefundList');
+    });
+
+
+    //砍价
+    $router->group(['prefix' => 'reduce'], function () use ($router) {
+        $router->get('/', 'ReduceController@index')->name('admin.promotion.reduce.index');
+        $router->get('create', 'ReduceController@create')->name('admin.promotion.reduce.create');
+        $router->get('edit/{id}', 'ReduceController@edit')->name('admin.promotion.reduce.edit');
+        $router->post('delete/{id}', 'ReduceController@delete')->name('admin.promotion.reduce.delete');
+        $router->post('store', 'ReduceController@store')->name('admin.promotion.reduce.store');
+        $router->get('getSpuModal', 'ReduceController@getSpuModal')->name('admin.promotion.reduce.getSpuModal');
+        $router->post('getSpuData', 'ReduceController@getSpuData')->name('admin.promotion.reduce.getSpuData');
+        $router->post('update', 'ReduceController@update')->name('admin.promotion.reduce.update');
+
+        $router->get('getItemLists', 'ReduceController@getItemLists')->name('admin.promotion.reduce.getItemLists');
+        $router->get('getUserLists', 'ReduceController@getUserLists')->name('admin.promotion.reduce.getUserLists');
+        $router->get('getHelpTextModal', 'ReduceController@getHelpTextModal')->name('admin.promotion.reduce.getHelpTextModal');
+        $router->post('settings', 'ReduceController@settings')->name('admin.promotion.reduce.settings');
+    });
+
 });
 
 
@@ -236,3 +277,4 @@ $router->group(['prefix' => 'admin/store/comments'], function () use ($router) {
     $router->post('searchUsers', 'CommentsController@searchUsers')->name('admin.comments.searchUsers');
     $router->post('store', 'CommentsController@store')->name('admin.comments.store');
 });
+

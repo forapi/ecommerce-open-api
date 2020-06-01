@@ -15,8 +15,8 @@ use EasyWeChat;
 use GuoJiangClub\Component\Order\Models\Order;
 use GuoJiangClub\Component\Order\Repositories\OrderRepository;
 use GuoJiangClub\Component\Payment\Models\Payment;
-use Illuminate\Http\Request;
 use iBrand\Component\Pay\Facades\Charge;
+use Illuminate\Http\Request;
 
 class WechatPayController extends Controller
 {
@@ -49,13 +49,10 @@ class WechatPayController extends Controller
             return $this->failed('无法支付，需支付金额为零');
         }
 
-        $charge = Charge::create(['channel' => 'wx_lite'
-            , 'order_no' => $order_no
-            , 'amount' => $order->getNeedPayAmount()
-            , 'client_ip' => \request()->getClientIp()
-            , 'subject' => $order->getSubject()
-            , 'body' => $order->getSubject()
-            , 'extra' => ['openid' => \request('openid')]
+        //砍价
+        event('order.reduce.check.stock', [$order]);
+
+        $charge = Charge::create(['channel' => 'wx_lite', 'order_no' => $order_no, 'amount' => $order->getNeedPayAmount(), 'client_ip' => \request()->getClientIp(), 'subject' => $order->getSubject(), 'body' => $order->getSubject(), 'extra' => ['openid' => \request('openid')],
         ]);
 
         return $this->success(compact('charge'));

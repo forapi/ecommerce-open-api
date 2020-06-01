@@ -24,4 +24,15 @@ interface DiscountRepository extends RepositoryInterface
      * @return mixed
      */
     public function findActive($isCoupon = 0);
+
+    /**
+     * 获取可领取优惠券列表/促销优惠活动.
+     *
+     * @param int $is_coupon
+     * @param int $channel
+     * @param int $limit
+     *
+     * @return mixed
+     */
+    public function getDiscountByType($is_coupon = 1, $channel = 'ec', $limit = 10, $is_agent_share = null);
 }

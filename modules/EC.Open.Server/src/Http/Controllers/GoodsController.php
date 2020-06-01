@@ -11,9 +11,12 @@
 
 namespace GuoJiangClub\EC\Open\Server\Http\Controllers;
 
+use Carbon\Carbon;
 use DB;
 use GuoJiangClub\Component\Category\RepositoryContract as CategoryRepository;
 use GuoJiangClub\Component\Discount\Repositories\CouponRepository;
+use GuoJiangClub\Component\MultiGroupon\Repositories\MultiGrouponRepository;
+use GuoJiangClub\Component\MultiGroupon\Service\MultiGrouponService;
 use GuoJiangClub\Component\Product\AttributeRelation;
 use GuoJiangClub\Component\Product\Models\Attribute;
 use GuoJiangClub\Component\Product\Models\Specification;
@@ -34,12 +37,15 @@ class GoodsController extends Controller
 
     public function __construct(GoodsRepository $goodsRepository,
                                 CouponRepository $couponRepository,
-                                CategoryRepository $categoryRepository
-    )
-    {
+                                CategoryRepository $categoryRepository,
+                                MultiGrouponRepository $multiGrouponRepository,
+                                MultiGrouponService $multiGrouponService
+    ) {
         $this->goodsRepository = $goodsRepository;
         $this->couponRepository = $couponRepository;
         $this->categoryRepository = $categoryRepository;
+        $this->multiGrouponRepository = $multiGrouponRepository;
+        $this->multiGrouponService = $multiGrouponService;
     }
 
     public function index()
@@ -55,7 +61,7 @@ class GoodsController extends Controller
             $categoryIds = [];
 
             $categoryIds = $this->categoryRepository->getSubIdsById($categoryId);
-            $goodsCategoryTable = config('ibrand.app.database.prefix', 'ibrand_') . 'goods_category';
+            $goodsCategoryTable = config('ibrand.app.database.prefix', 'ibrand_').'goods_category';
             $categoryGoodsIds = DB::table($goodsCategoryTable)->whereIn('category_id', $categoryIds)->select('goods_id')->distinct()->get()
                 ->pluck('goods_id')->toArray();
             $hasFlag = true;
@@ -70,7 +76,7 @@ class GoodsController extends Controller
             foreach ($specArray as $key => $item) {
                 if ('size' == $key) {
                     $tempIds[$k] = SpecificationRelation::where('spec_value_id', $item)->select('goods_id')->distinct()->get()->pluck('goods_id')->toArray();
-                    //old code. $tempIds[$k] = DB::table('el_goods_spec_relation')->where('spec_value_id', $item)->select('goods_id')->distinct()->get()->pluck('goods_id')->toArray();
+                //old code. $tempIds[$k] = DB::table('el_goods_spec_relation')->where('spec_value_id', $item)->select('goods_id')->distinct()->get()->pluck('goods_id')->toArray();
                 } else {
                     $specValueIds = SpecificationValue::where('color', $item)->select('id')->get()->pluck('id')->toArray();
                     $tempIds[$k] = SpecificationRelation::whereIn('spec_value_id', $specValueIds)->select('goods_id')->distinct()->get()->pluck('goods_id')->toArray();
@@ -157,7 +163,7 @@ class GoodsController extends Controller
 
             if (!empty($keyword = request('keyword'))) {
                 $query = $query->where(function ($query) use ($keyword) {
-                    $query->where('name', 'like', '%' . $keyword . '%')->orWhere('tags', 'like', '%' . $keyword . '%');
+                    $query->where('name', 'like', '%'.$keyword.'%')->orWhere('tags', 'like', '%'.$keyword.'%');
                 });
             }
 
@@ -175,7 +181,7 @@ class GoodsController extends Controller
         if ($categoryId = request('c_id')) {
             $categoryIds = $this->categoryRepository->getSubIdsById($categoryId);
 
-            $goodsCategoryTable = config('ibrand.app.database.prefix', 'ibrand_') . 'goods_category';
+            $goodsCategoryTable = config('ibrand.app.database.prefix', 'ibrand_').'goods_category';
             $categoryGoodsIds = DB::table($goodsCategoryTable)->whereIn('category_id', $categoryIds)->select('goods_id')->distinct()->get()
                 ->pluck('goods_id')->toArray();
 
@@ -206,7 +212,7 @@ class GoodsController extends Controller
                 $alias = 2 == $item->type ? 'color' : 'size';
                 $specValue = $item->values->whereIn('id', $SizeFilterID);
                 foreach ($specValue as $kitem) {
-                    $itemName = $item->name . ':' . $alias;
+                    $itemName = $item->name.':'.$alias;
                     if ($kitem->color) {
                         if (!isset($specArray[$itemName]) or
                             (isset($specArray[$itemName]) and !in_array($kitem->color, $specArray[$itemName]))
@@ -233,7 +239,7 @@ class GoodsController extends Controller
         $attrGoodsIds = $goodIds;
         if (request('attrValue') and $attrArray = array_unique(request('attrValue'))) {
             foreach ($attrArray as $key => $value) {
-                $tempAttrIds[$value] = SpecificationRelation::where('attribute_value', 'like', '%' . $value . '%')
+                $tempAttrIds[$value] = SpecificationRelation::where('attribute_value', 'like', '%'.$value.'%')
                     ->select('goods_id')
                     ->distinct()->get()->pluck('goods_id')->toArray();
             }
@@ -257,15 +263,48 @@ class GoodsController extends Controller
 
         //获取优惠折扣
         $discounts = app(DiscountService::class)->getDiscountsByGoods($goods);
-        if (!$discounts || count($discounts) == 0) {
+        if (!$discounts || 0 == count($discounts)) {
             $result = null;
         } else {
             $result['discounts'] = collect_to_array($discounts->where('coupon_based', 0));
             $result['coupons'] = collect_to_array($discounts->where('coupon_based', 1));
         }
 
+        //小拼团
+        $multiGroupon = [];
+        $user = auth('api')->user();
+        if ($multiGroupon = $this->multiGrouponRepository->getValidGroupByGoodsId($id) or
+            ($multiItemId = request('multi_groupon_item_id') and $multiGroupon = $this->multiGrouponService->getGrouponByItemID($multiItemId))
+        ) {
+            $goods->server_time = Carbon::now()->toDateTimeString();
+            $goods->user_limit = 1;
+            $multiGrouponStatus = $this->multiGrouponService->getJoinStatusByUser($user, $multiGroupon->id, request('multi_groupon_item_id'));
+            $goods->multi_groupon_join_status = $multiGrouponStatus[0];
+            $goods->multi_groupon_item_complete_status = $multiGrouponStatus[1];
+            $goods->multi_groupon_order_no = $multiGrouponStatus[2];
+            $goods->multi_groupon_init_status = $multiGrouponStatus[5];
+
+            //单独把团结束时间做新字段，是为了兼容在商品详情页，如果有子团id参数，那么要显示子团的结束时间
+            $goods->multi_groupon_starts_at = $multiGrouponStatus[3] ? $multiGrouponStatus[3] : $multiGroupon->starts_at;
+            $goods->multi_groupon_ends_at = $multiGrouponStatus[4] ? $multiGrouponStatus[4] : $multiGroupon->ends_at;
+        }
+
+        $has_multiGroup = 0;
+        if (!is_null($user) && isset($user->id)) {
+            if (!empty($multiGroupon)) {
+                $leader = $multiGroupon->users()->where('user_id', $user->id)->where('is_leader', 1)->first();
+                if ($leader) {
+                    $has_multiGroup = 1;
+                }
+            }
+        }
+
         return $this->response()->item($goods, new GoodsTransformer())
-            ->setMeta(['attributes' => $goods->attr, 'discounts' => $result]);
+            ->setMeta(['attributes' => $goods->attr,
+                'discounts' => $result,
+                'multiGroupon' => $multiGroupon,
+                'has_multiGroup' => $has_multiGroup,
+            ]);
     }
 
     public function getStock($id)
@@ -370,7 +409,7 @@ class GoodsController extends Controller
 
         $avatar = isset($user->avatar) ? $user->avatar : '';
 
-        $filename = Storage::disk('public')->url('wxacode/' . $filename);
+        $filename = Storage::disk('public')->url('wxacode/'.$filename);
 
         $url = route('goods.share.view', compact('id', 'nick_name', 'avatar', 'filename'));
 

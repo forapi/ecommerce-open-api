@@ -13,6 +13,7 @@ namespace GuoJiangClub\Component\Order\Models;
 
 use GuoJiangClub\Component\Discount\Contracts\DiscountSubjectContract;
 use GuoJiangClub\Component\Payment\Models\Payment;
+use GuoJiangClub\Component\Refund\Models\Refund;
 use GuoJiangClub\Component\Shipping\Models\Shipping;
 use GuoJiangClub\Component\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -37,11 +38,26 @@ class Order extends Model implements DiscountSubjectContract
 
     const TYPE_DEFAULT = 0; //默认类型
     const TYPE_DISCOUNT = 1; //折扣订单
+    const TYPE_IN_SOURCE = 2; //内购订单
+    const TYPE_GIFT = 3; //礼品订单
+    const TYPE_SUIT = 4; //套餐订单
+
+    const TYPE_SHOP = 6; //门店O2O订单
+
+    const TYPE_POINT = 5; //积分商城订单   6是O2O订单
+    const TYPE_SECKILL = 7; //秒杀订单
 
     /*distribution_status*/
     const DELIVERED_WAIT = 0;  //待发货
     const DELIVERED_STATUS = 1; //已全部发货
     const DELIVERED_PARTLY = 2; //部分发货
+
+    const TYPE_GROUPON = 8; //拼团订单
+
+    const TYPE_MULTI_GROUPON = 10; //小拼团订单
+    const TYPE_VIRTUAL_MULTI_GROUPON = 12; //小拼团虚拟订单
+
+    const TYPE_REDUCE = 16; //砍价
 
     protected $guarded = ['id'];
 
@@ -83,6 +99,11 @@ class Order extends Model implements DiscountSubjectContract
         return $this->hasMany(Adjustment::class);
     }
 
+    public function specialTypes()
+    {
+        return $this->hasMany(SpecialType::class);
+    }
+
     public function payments()
     {
         return $this->hasMany(Payment::class);
@@ -96,6 +117,11 @@ class Order extends Model implements DiscountSubjectContract
     public function shippings()
     {
         return $this->hasMany(Shipping::class);
+    }
+
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
     }
 
     /**
@@ -179,7 +205,6 @@ class Order extends Model implements DiscountSubjectContract
         return $this->items->contains(function ($value, $key) use ($item) {
             return $item->item_id == $value->item_id and $item->type = $value->type;
         });
-
         // return $this->items->contains('goods_id', $item->goods_id);
     }
 
@@ -227,12 +252,12 @@ class Order extends Model implements DiscountSubjectContract
         return $this->adjustments->contains(function ($value, $key) use ($adjustment) {
             if ($adjustment->order_item_id) {
                 return $adjustment->origin_type == $value->origin_type
-                and $adjustment->origin_id == $value->origin_id
-                and $adjustment->order_item_id == $value->order_item_id;
+                    and $adjustment->origin_id == $value->origin_id
+                    and $adjustment->order_item_id == $value->order_item_id;
             }
 
             return $adjustment->origin_type == $value->origin_type
-            and $adjustment->origin_id == $value->origin_id;
+                and $adjustment->origin_id == $value->origin_id;
         });
     }
 

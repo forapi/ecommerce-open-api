@@ -149,12 +149,12 @@ class Discount extends Model implements DiscountContract
 
         $type = [];
 
-        if(str_contains($action->type,'fixed')){
+        if (str_contains($action->type, 'fixed')) {
             $type['type'] = 'cash';
             $type['value'] = json_decode($action->configuration, true)['amount'] / 100;
         }
 
-        if(str_contains($action->type,'percentage')){
+        if (str_contains($action->type, 'percentage')) {
             $type['type'] = 'percentage';
             $type['value'] = json_decode($action->configuration, true)['percentage'] / 100;
         }

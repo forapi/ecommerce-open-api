@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of ibrand/core.
+ * This file is part of ibrand/EC-Open-Core.
  *
  * (c) 果酱社区 <https://guojiang.club>
  *
@@ -25,7 +25,7 @@ class UnitFixedDiscountAction extends DiscountUnitActionContract
             if ($this->checkItemRule($item->getModel(), $discount)) { //只有符合规则的商品才能获得积分
                 $discountAmount = $this->calculateAdjustmentAmount($item->total, $configuration['amount']);
 
-                $adjustment = $this->createAdjustment($discount,$discount);
+                $adjustment = $this->createAdjustment($discount, $discount);
                 $adjustment->amount = $discountAmount;
                 $adjustment->order_item_id = $item->id;
                 $subject->addAdjustment($adjustment);
@@ -36,10 +36,10 @@ class UnitFixedDiscountAction extends DiscountUnitActionContract
         }
     }
 
-
     /**
      * @param $discountSubjectTotal
      * @param $targetDiscountAmount
+     *
      * @return float|int
      */
     private function calculateAdjustmentAmount($discountSubjectTotal, $targetDiscountAmount)
@@ -47,11 +47,11 @@ class UnitFixedDiscountAction extends DiscountUnitActionContract
         return -1 * min($discountSubjectTotal, $targetDiscountAmount);
     }
 
-
     /**
      * @param DiscountSubjectContract $subject
-     * @param array $configuration
-     * @param DiscountContract $discount
+     * @param array                   $configuration
+     * @param DiscountContract        $discount
+     *
      * @return mixed|void
      */
     public function calculate(DiscountSubjectContract $subject, array $configuration, DiscountContract $discount)
@@ -102,8 +102,9 @@ class UnitFixedDiscountAction extends DiscountUnitActionContract
 
     /**
      * @param DiscountSubjectContract $subject
-     * @param array $configuration
-     * @param DiscountContract $discount
+     * @param array                   $configuration
+     * @param DiscountContract        $discount
+     *
      * @deprecated
      */
     public function combinationCalculate(DiscountSubjectContract $subject, array $configuration, DiscountContract $discount)

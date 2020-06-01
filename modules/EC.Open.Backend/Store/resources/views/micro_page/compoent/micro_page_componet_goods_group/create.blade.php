@@ -198,7 +198,7 @@
                                     <span onclick="addGoodsGroupImage()">  添加一个自定义分组</span>
                                 </a>
                             </li>
-                            <p style="margin-left: -35px;">*拖动可更改图片位置</p>
+                            <p style="margin-left: -35px;">*拖动可更改位置</p>
                         </ul>
 
                     </div>

@@ -77,7 +77,7 @@ class UserController extends Controller
         }
 
         $extension = $file->getClientOriginalExtension();
-        $filename = $this->generaterandomstring() . '.' . $extension;
+        $filename = $this->generaterandomstring().'.'.$extension;
 
         $image = $file->move($destinationPath, $filename);
 
@@ -101,11 +101,11 @@ class UserController extends Controller
 
         if ('save' == request('action')) {
             $user = $request->user();
-            $user->avatar = '/storage/uploads/' . $filename;
+            $user->avatar = '/storage/uploads/'.$filename;
             $user->save();
         }
 
-        return $this->success(['url' => url('/storage/uploads/' . $filename)]);
+        return $this->success(['url' => url('/storage/uploads/'.$filename)]);
     }
 
     public function updateMobile(Request $request)

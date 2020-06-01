@@ -24,8 +24,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         if (!class_exists('CreateAddressesTables')) {
             $timestamp = date('Y_m_d_His', time());
             $this->publishes([
-                __DIR__ . '/../migrations/create_addresses_tables.php.stub' =>
-                    database_path() . "/migrations/{$timestamp}_create_addresses_tables.php",
+                __DIR__.'/../migrations/create_addresses_tables.php.stub' => database_path()."/migrations/{$timestamp}_create_addresses_tables.php",
             ], 'migrations');
         }
     }
@@ -39,6 +38,4 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->app->alias(RepositoryContract::class, 'repository.address');
     }
-
-
 }

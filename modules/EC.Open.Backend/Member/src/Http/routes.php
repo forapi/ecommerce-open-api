@@ -3,7 +3,7 @@
 /*
  * This file is part of ibrand/member-backend.
  *
- * (c) 果酱社区 <https://guojiang.club>
+ * (c) GuoJiangClub <https://www.ibrand.cc>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -33,7 +33,7 @@ $router->group(['prefix' => 'admin/member'], function () use ($router) {
     $router->get('users/{id}/couponslist', 'UserController@couponslist')->name('admin.users.couponslist');
     $router->get('users/{id}/orderslist', 'UserController@orderslist')->name('admin.users.orderslist');
 
-    $router->get('users/getUserPointData/{id}/{type}', 'UserController@getUserPointData')->name('admin.users.getUserPointList');
+    $router->get('users/getUserPointData/{id}', 'UserController@getUserPointData')->name('admin.users.getUserPointList');
 
     $router->post('users/addPoint', 'UserController@addPoint')->name('admin.users.addPoint');
 

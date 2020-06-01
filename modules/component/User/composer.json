@@ -1,9 +1,9 @@
 {
   "name": "ibrand/user",
   "type": "library",
-  "description": "iBrand User component",
+  "description": "GuoJiangClub User component",
   "keywords": [
-    "iBrand",
+    "GuoJiangClub",
     "User",
     "Component"
   ],
@@ -11,7 +11,7 @@
   "authors": [
     {
       "name": "shjchen",
-      "email": "ibrand.shjchen@foxmail.com"
+      "email": "i@chenhow.com"
     }
   ],
   "require": {

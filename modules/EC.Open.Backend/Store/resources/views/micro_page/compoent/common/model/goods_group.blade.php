@@ -9,6 +9,9 @@
 @stop
 
 @section('after-styles-end')
+    <style>
+        li{ list-style: none;}
+    </style>
     {!! Html::style(env("APP_URL").'/assets/backend/libs/ladda/ladda-themeless.min.css') !!}
 @stop
 
@@ -39,7 +42,7 @@
                     @if($goods_items)
                         @foreach($goods_items as $item)
                             @if(!empty($item))
-                            <li id="goods{{$item->id}}"  class="goods-li" style="height:40px;" data-goods_id="{{$item->id}}">
+                            <li id="goods{{$item->id}}"  class="goods-li" style="height:40px;list-style: none;" data-goods_id="{{$item->id}}">
                                 <p class="btn btn-xs btn-danger minus" style="cursor: pointer">
                                     <i data-toggle="tooltip" data-placement="top" class="fa fa-minus" title=""></i></p>
                                 <img width="30" height="30" src="{{$item->img}}" alt="">
@@ -142,7 +145,7 @@
 
                 href = href.replace('#',id);
 
-                var html = [" <li style=\"height:40px;\" id='goods"+id+"'"+
+                var html = [" <li style=\"height:40px;list-style: none;\" id='goods"+id+"'"+
                 " class='goods-li' data-goods_id=" + id + "  >",
                     "                        <p class=\"btn btn-xs btn-danger minus\  style=\"cursor: pointer\">",
                     "                            <i data-toggle=\"tooltip\" data-placement=\"top\"",

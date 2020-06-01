@@ -12,7 +12,9 @@
 namespace GuoJiangClub\Component\Point\Models;
 
 use GuoJiangClub\Component\User\Models\User;
+use GuoJiangClub\Component\Order\Models\OrderItem;
 use Illuminate\Database\Eloquent\Model;
+
 
 class Point extends Model
 {
@@ -24,7 +26,7 @@ class Point extends Model
 
         $prefix = config('ibrand.app.database.prefix', 'ibrand_');
 
-        $this->setTable($prefix . 'point');
+        $this->setTable($prefix.'point');
     }
 
     public function scopeValid($query)
@@ -41,11 +43,16 @@ class Point extends Model
         return $query->where('valid_time', '<', $current)->where('valid_time', '!=', null)->where('status', 1);
     }
 
+    public function scopeSumPoint($query)
+    {
+        return $query->sum('value');
+    }
+
     public function scopeWithinTime($query)
     {
         $current = date('Y-m-d H:i:s', time());
 
-        return $query->whereRaw('valid_time>\'' . $current . '\' or valid_time = null');
+        return $query->whereRaw('valid_time>\''.$current.'\' or valid_time = null');
     }
 
     public function user()
@@ -59,9 +66,14 @@ class Point extends Model
             ->where('item_type', 'GuoJiangClub\Component\Order\Models\Order')->with('order');
     }
 
-    public function point_order_item()
+    public function order_item()
     {
 
+        return $this->belongsTo(OrderItem::class, 'item_id');
+    }
+
+    public function point_order_item()
+    {
         return $this->hasOne(Point::class, 'id')
             ->where('item_type', 'GuoJiangClub\Component\Order\Models\OrderItem')->with('order_item.order');
     }

@@ -1,18 +1,28 @@
 <?php
 
+/*
+ * This file is part of ibrand/EC-Open-Core.
+ *
+ * (c) 果酱社区 <https://guojiang.club>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace GuoJiangClub\EC\Open\Core\Jobs;
 
-use Carbon\Carbon;
 use GuoJiangClub\Component\Order\Models\Order;
 use GuoJiangClub\EC\Open\Core\Processor\OrderProcessor;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class AutoCancelOrder implements ShouldQueue
 {
-    use InteractsWithQueue, Queueable, SerializesModels;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     protected $order;
 

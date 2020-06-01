@@ -1,7 +1,7 @@
 <?php
 
 /*
- * This file is part of ibrand/core.
+ * This file is part of ibrand/EC-Open-Core.
  *
  * (c) 果酱社区 <https://guojiang.club>
  *

@@ -369,6 +369,7 @@
                                 {{--</a>--}}
                             {{--</li>--}}
                             <p style="margin-left: -35px;">*拖动可更改图片位置</p>
+                            <p style="margin-left: -35px;">*如页面不跳转,链接请选择自定义,填0</p>
                         </ul>
 
                     </div>

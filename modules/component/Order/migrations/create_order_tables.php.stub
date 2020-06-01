@@ -3,7 +3,7 @@
 /*
  * This file is part of ibrand/order.
  *
- * (c) 果酱社区 <https://guojiang.club>
+ * (c) GuoJiangClub <https://www.ibrand.cc>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -113,6 +113,7 @@ class CreateOrderTables extends Migration
                 $table->increments('id');
                 $table->integer('order_id')->unsigned()->default(0);
                 $table->integer('order_item_id')->unsigned()->default(0);
+                $table->integer('goods_id')->nullable()->default(0); //商品ID
                 $table->integer('item_id')->unsigned()->default(0); //评价的商品，应该使用goods_id
                 $table->text('item_meta')->nullable();
                 $table->integer('user_id')->unsigned();
@@ -127,6 +128,20 @@ class CreateOrderTables extends Migration
                 $table->softDeletes();
             });
         }
+
+      if (!Schema::hasTable($prefix . 'order_special_type')) {
+
+            Schema::create($prefix .'order_special_type', function (Blueprint $table) {
+                $table->increments('id');
+                $table->integer('order_id')->unsigned()->nullable();
+                $table->string('origin_type')->nullable();   //类型
+                $table->integer('origin_id')->default(0);
+                $table->timestamps();
+                $table->softDeletes();
+            });
+
+         }
+
     }
 
     /**
@@ -142,5 +157,6 @@ class CreateOrderTables extends Migration
         Schema::dropIfExists($prefix . 'order_adjustment');
         Schema::dropIfExists($prefix . 'order_item');
         Schema::dropIfExists($prefix . 'order');
+        Schema::dropIfExists($prefix . 'order_special_type');
     }
 }

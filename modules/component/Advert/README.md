@@ -1,6 +1,6 @@
-# iBrand Address Component
+# GuoJiangClub Address Component
 
-Address Component for iBrand Application.
+Address Component for GuoJiangClub Application.
 
 [![Build Status](https://travis-ci.org/ibrandcc/address.svg?branch=master)](https://travis-ci.org/ibrandcc/address)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ibrandcc/address/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ibrandcc/address/?branch=master)

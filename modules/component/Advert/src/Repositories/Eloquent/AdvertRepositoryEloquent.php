@@ -37,8 +37,8 @@ class AdvertRepositoryEloquent extends BaseRepository implements AdvertRepositor
      *
      * @return mixed
      */
-    public function getByCode($code,$status=1)
+    public function getByCode($code, $status = 1)
     {
-        return $this->findByField('code', $code)->where('status',$status)->first();
+        return $this->findByField('code', $code)->where('status', $status)->first();
     }
 }

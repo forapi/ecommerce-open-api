@@ -11,7 +11,6 @@
 
 namespace GuoJiangClub\Component\Point\Repository\Eloquent;
 
-use Carbon\Carbon;
 use GuoJiangClub\Component\Point\Models\Point;
 use GuoJiangClub\Component\Point\Repository\PointRepository;
 use Prettus\Repository\Eloquent\BaseRepository;
@@ -28,11 +27,58 @@ class PointRepositoryEloquent extends BaseRepository implements PointRepository
         return Point::class;
     }
 
+    public function getSumPoint($id, $type = null)
+    {
+        if ($type !== null) {
+            $sum = $this->model->where([
+                'user_id' => $id,
+                'type' => $type
+            ])->sumPoint();
+        } else {
+            $sum = $this->model->where('user_id', $id)->sumPoint();
+        }
+        return $this->getSumNumeric($sum);
+    }
+
+    public function getSumPointFrozen($id, $type = null)
+    {
+        if ($type !== null) {
+            $sum = $this->model->where([
+                'user_id' => $id,
+                'type' => $type,
+                'status' => 0
+            ])->withinTime()->sumPoint();
+        } else {
+            $sum = $this->model->where('user_id', $id)->where('status', 0)->withinTime()->sumPoint();
+        }
+        return $this->getSumNumeric($sum);
+    }
+
+    public function getSumPointOverValid($id, $type = null)
+    {
+        if ($type !== null) {
+            $sum = $this->model->where([
+                'user_id' => $id,
+                'type' => $type
+            ])->overValid()->sumPoint();
+        } else {
+            $sum = $this->model->where('user_id', $id)->overValid()->sumPoint();
+        }
+        return $this->getSumNumeric($sum);
+    }
+
+    private function getSumNumeric($sum)
+    {
+        if (!is_numeric($sum)) {
+            return 0;
+        }
+        return $sum;
+    }
+    
     public function getSumPointValid($user_id)
     {
         return $this->model->where('user_id', $user_id)->valid()->sum('value');
     }
-
 
     public function getListPoint($id, $valid = 0)
     {
@@ -49,9 +95,11 @@ class PointRepositoryEloquent extends BaseRepository implements PointRepository
     }
 
     /**
-     * get point by item's type and item's id;
+     * get point by item's type and item's id;.
+     *
      * @param $itemType
      * @param $itemId
+     *
      * @return mixed
      */
     public function getPointByItem($itemType, $itemId)
@@ -62,12 +110,13 @@ class PointRepositoryEloquent extends BaseRepository implements PointRepository
     public function getPointsByConditions($where, $limit = 20)
     {
         $this->applyConditions($where);
+
         return $this->orderBy('created_at', 'desc')->paginate($limit);
     }
 
     public function distributePercentage($order)
     {
-        if (!$adjustment = $order->getAdjustments() OR !$adjustment = $adjustment->where('origin_type', 'point')->first()) {
+        if (!$adjustment = $order->getAdjustments() or !$adjustment = $adjustment->where('origin_type', 'point')->first()) {
             return false;
         }
         $amount = (-1) * $adjustment->amount;
@@ -90,10 +139,11 @@ class PointRepositoryEloquent extends BaseRepository implements PointRepository
             }
             $splitDiscountAmount[] = [
                 'item_id' => $item->id,
-                'value' => (int) ($amount * $percentageItem / 100)
+                'value' => (int) ($amount * $percentageItem / 100),
             ];
-            $i++;
+            ++$i;
         }
+
         return $splitDiscountAmount;
     }
 }

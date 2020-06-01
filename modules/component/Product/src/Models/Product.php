@@ -23,7 +23,7 @@ class Product extends Model
     {
         parent::__construct($attributes);
 
-        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_') . 'goods_product');
+        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'goods_product');
     }
 
     public function getStockQtyAttribute()

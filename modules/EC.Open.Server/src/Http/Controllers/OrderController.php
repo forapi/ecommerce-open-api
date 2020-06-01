@@ -72,4 +72,36 @@ class OrderController extends Controller
 
         return $this->response()->item($order, new OrderTransformer());
     }
+
+    /**
+     * 获取能够进行售后维修的订单
+     */
+    public function getRefundOrders()
+    {
+        $orderConditions = [];
+
+        $orderConditions ['channel'] = 'ec';
+        $orderConditions ['status'] = ['status', '<>', 0];
+        $orderConditions ['status2'] = ['status', '<>', 9];
+        $orderConditions ['status3'] = ['status', '<>', 1];
+        $orderConditions ['status4'] = ['status', '<>', 8];
+        $orderConditions ['status5'] = ['status', '<>', 6];
+        $orderConditions ['status6'] = ['status', '<>', 5];
+
+        $orderConditions ['user_id'] = request()->user()->id;
+
+        $itemConditions = [];
+
+        $limit = request('limit') ? request('limit') : 15;
+
+        if ($criteria = request('criteria')) {
+            $itemConditions['order_no'] = ['order_no', 'like', '%' . $criteria . '%'];
+            $itemConditions['item_name'] = ['item_name', 'like', '%' . $criteria . '%'];
+            $itemConditions['item_id'] = ['item_id', 'like', '%' . $criteria . '%'];
+        }
+
+        $order = $this->orderRepository->getOrdersByCriteria($orderConditions, $itemConditions, $limit);
+
+        return $this->response()->paginator($order, new OrderTransformer('refund'));
+    }
 }

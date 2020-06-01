@@ -1,8 +1,8 @@
 {
   "name": "ibrand/shipping",
-  "description": "iBrand's shipping component",
+  "description": "GuoJiangClub's shipping component",
   "keywords": [
-    "iBrand",
+    "GuoJiangClub",
     "shipping",
     "component"
   ],
@@ -10,7 +10,7 @@
   "authors": [
     {
       "name": "shjchen",
-      "email": "ibrand.shjchen@foxmail.com"
+      "email": "i@chenhow.com"
     }
   ],
   "require": {

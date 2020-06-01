@@ -1,9 +1,9 @@
 {
   "name": "ibrand/favorite",
   "type": "library",
-  "description": "iBrand Favorite component",
+  "description": "GuoJiangClub Favorite component",
   "keywords": [
-    "iBrand",
+    "GuoJiangClub",
     "Favorite",
     "component"
   ],
@@ -11,7 +11,7 @@
   "authors": [
     {
       "name": "shjchen",
-      "email": "ibrand.shjchen@foxmail.com"
+      "email": "i@chenhow.com"
     }
   ],
   "require": {

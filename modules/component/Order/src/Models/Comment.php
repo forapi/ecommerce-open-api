@@ -11,6 +11,7 @@
 
 namespace GuoJiangClub\Component\Order\Models;
 
+use GuoJiangClub\Component\Product\Models\Goods;
 use GuoJiangClub\Component\User\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,7 +24,7 @@ class Comment extends Model
 
     public function __construct(array $attributes = [])
     {
-        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'order_comment');
+        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_') . 'order_comment');
         parent::__construct($attributes);
     }
 
@@ -53,5 +54,15 @@ class Comment extends Model
     public function getPicListAttribute($value)
     {
         return unserialize($value);
+    }
+
+    public function goods()
+    {
+        return $this->belongsTo(Goods::class, 'goods_id');
+    }
+
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class, 'order_item_id');
     }
 }

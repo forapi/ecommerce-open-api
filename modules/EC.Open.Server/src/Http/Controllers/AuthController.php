@@ -13,19 +13,17 @@ namespace GuoJiangClub\EC\Open\Server\Http\Controllers;
 
 use GuoJiangClub\Component\User\Repository\UserBindRepository;
 use GuoJiangClub\Component\User\Repository\UserRepository;
-use GuoJiangClub\EC\Open\Core\Auth\User;
 use GuoJiangClub\Component\User\UserService;
+use GuoJiangClub\EC\Open\Core\Auth\User;
 use iBrand\Sms\Facade as Sms;
 
 class AuthController extends Controller
 {
-
     protected $userRepository;
     protected $userBindRepository;
     protected $userService;
 
-    public function __construct(UserRepository $userRepository, UserBindRepository $userBindRepository
-        , UserService $userService)
+    public function __construct(UserRepository $userRepository, UserBindRepository $userBindRepository, UserService $userService)
     {
         $this->userRepository = $userRepository;
         $this->userBindRepository = $userBindRepository;

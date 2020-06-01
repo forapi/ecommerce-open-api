@@ -12,6 +12,7 @@
 namespace GuoJiangClub\Component\Order\Models;
 
 use GuoJiangClub\Component\Product\Models\Product;
+use GuoJiangClub\Component\Refund\Models\Refund;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,13 +23,11 @@ class OrderItem extends Model
     protected $guarded = ['id'];
     protected $model;
 
-
     public function __construct(array $attributes = [])
     {
         $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'order_item');
         parent::__construct($attributes);
     }
-
 
     public function order()
     {
@@ -38,6 +37,11 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'item_id');
+    }
+
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
     }
 
     public function getModel()
@@ -114,7 +118,6 @@ class OrderItem extends Model
         return json_decode($value, true);
     }
 
-
     public function getItemSkuAttribute()
     {
         if ($model = $this->getModel()) {
@@ -127,7 +130,6 @@ class OrderItem extends Model
 
         return null;
     }
-
 
     public function getUnitsTotalYuanAttribute()
     {

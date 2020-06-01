@@ -1,3 +1,3 @@
-# iBrand Discount Component
+# GuoJiangClub Discount Component
 
-Discount Component for iBrand Application.
+Discount Component for GuoJiangClub Application.

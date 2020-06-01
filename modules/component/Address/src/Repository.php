@@ -31,10 +31,11 @@ class Repository extends BaseRepository implements RepositoryContract
         return Address::class;
     }
 
-
     /**
      * @param array $attributes
+     *
      * @return mixed
+     *
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     public function create(array $attributes = [])
@@ -46,11 +47,12 @@ class Repository extends BaseRepository implements RepositoryContract
         return $address;
     }
 
-
     /**
      * @param array $attributes
      * @param $id
+     *
      * @return mixed
+     *
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     public function update(array $attributes, $id)
@@ -83,9 +85,9 @@ class Repository extends BaseRepository implements RepositoryContract
         return $this->orderBy('updated_at', 'desc')->findByField('user_id', $userId);
     }
 
-
     /**
      * @param $userId
+     *
      * @return mixed|null
      */
     public function getDefaultByUser($userId)
@@ -107,12 +109,13 @@ class Repository extends BaseRepository implements RepositoryContract
         return $default;
     }
 
-
     /**
      * @param array $attributes
      * @param $id
      * @param $userId
+     *
      * @return bool|mixed
+     *
      * @throws \Prettus\Validator\Exceptions\ValidatorException
      */
     public function updateByUser(array $attributes, $id, $userId)

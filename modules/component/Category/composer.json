@@ -1,9 +1,9 @@
 {
   "name": "ibrand/category",
   "type": "library",
-  "description": "iBrand Category component",
+  "description": "GuoJiangClub Category component",
   "keywords": [
-    "iBrand",
+    "GuoJiangClub",
     "Category",
     "component"
   ],
@@ -11,7 +11,7 @@
   "authors": [
     {
       "name": "shjchen",
-      "email": "ibrand.shjchen@foxmail.com"
+      "email": "i@chenhow.com"
     }
   ],
   "require": {

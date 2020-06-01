@@ -1,9 +1,9 @@
 {
 	"name": "ibrand/point",
 	"type": "library",
-	"description": "iBrand Point component",
+	"description": "GuoJiangClub Point component",
 	"keywords": [
-		"iBrand",
+		"GuoJiangClub",
 		"Point",
 		"component"
 	],
@@ -11,7 +11,7 @@
 	"authors": [
 		{
 			"name": "shjchen",
-			"email": "ibrand.shjchen@foxmail.com"
+			"email": "i@chenhow.com"
 		}
 	],
 	"require": {

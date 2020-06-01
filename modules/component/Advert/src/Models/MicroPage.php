@@ -28,15 +28,13 @@ class MicroPage extends Model
      */
     public function __construct(array $attributes = [])
     {
-
         $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'micro_page');
 
         parent::__construct($attributes);
     }
 
-    public function micro_page_advert(){
-
-        return $this->hasMany(MicroPageAdvert::class,'micro_page_id');
+    public function micro_page_advert()
+    {
+        return $this->hasMany(MicroPageAdvert::class, 'micro_page_id');
     }
-
 }

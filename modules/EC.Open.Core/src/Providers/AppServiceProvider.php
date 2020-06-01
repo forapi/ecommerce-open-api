@@ -12,9 +12,12 @@
 namespace GuoJiangClub\EC\Open\Core\Providers;
 
 use GuoJiangClub\Component\Advert\AdvertServiceProvider;
+use GuoJiangClub\Component\Balance\BalanceServiceProvider;
+use GuoJiangClub\Component\Discount\Checkers\ItemTotalRuleChecker;
 use GuoJiangClub\Component\Discount\Contracts\AdjustmentContract;
 use GuoJiangClub\Component\Discount\Providers\DiscountServiceProvider;
 use GuoJiangClub\Component\Favorite\FavoriteServiceProvider;
+use GuoJiangClub\Component\MultiGroupon\MultiGrouponServiceProvider;
 use GuoJiangClub\Component\Order\Models\Adjustment;
 use GuoJiangClub\Component\Order\Providers\OrderServiceProvider;
 use GuoJiangClub\Component\Payment\Providers\PaymentServiceProvider;
@@ -22,11 +25,17 @@ use GuoJiangClub\Component\Point\PointServiceProvider;
 use GuoJiangClub\Component\Product\Models\Goods;
 use GuoJiangClub\Component\Product\Models\Product;
 use GuoJiangClub\Component\Product\ProductServiceProvider;
+use GuoJiangClub\Component\Reduce\ReduceServiceProvider;
+use GuoJiangClub\Component\Refund\RefundServiceProvider;
 use GuoJiangClub\Component\User\Models\User as BaseUser;
 use GuoJiangClub\Component\User\UserServiceProvider;
 use GuoJiangClub\EC\Open\Core\Auth\User;
 use GuoJiangClub\EC\Open\Core\Console\BuildAddress;
 use GuoJiangClub\EC\Open\Core\Console\BuildCoupon;
+use GuoJiangClub\EC\Open\Core\Discount\Actions\UnitFixedDiscountAction;
+use GuoJiangClub\EC\Open\Core\Discount\Actions\UnitPercentageDiscountAction;
+use GuoJiangClub\EC\Open\Core\Discount\Checkers\ContainsCategoryRuleChecker;
+use GuoJiangClub\EC\Open\Core\Discount\Checkers\ContainsProductRuleChecker;
 use GuoJiangClub\EC\Open\Core\Listeners\OrderEventListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -47,9 +56,11 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../../config/app.php' => config_path('ibrand/app.php'),
+                __DIR__ . '/../../config/app.php' => config_path('ibrand/app.php'),
             ]);
         }
+
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
 
         $this->commands([
             BuildAddress::class,
@@ -62,21 +73,24 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../../config/app.php', 'ibrand.app'
+            __DIR__ . '/../../config/app.php', 'ibrand.app'
         );
 
         $this->registerComponent();
 
         $this->app->bind(BaseUser::class, User::class);
         $this->app->bind(AdjustmentContract::class, Adjustment::class);
-        $this->app->bind(Goods::class,\GuoJiangClub\EC\Open\Core\Models\Goods::class);
-        $this->app->bind(Product::class,\GuoJiangClub\EC\Open\Core\Models\Product::class);
+        $this->app->bind(Goods::class, \GuoJiangClub\EC\Open\Core\Models\Goods::class);
+        $this->app->bind(Product::class, \GuoJiangClub\EC\Open\Core\Models\Product::class);
+
+        $this->registerDiscountComponent();
     }
 
     protected function registerComponent()
     {
         $this->app->register(UserServiceProvider::class);
         $this->app->register(ProductServiceProvider::class);
+        $this->app->register(BalanceServiceProvider::class);
         $this->app->register(DiscountServiceProvider::class);
         $this->app->register(\GuoJiangClub\Component\Category\ServiceProvider::class);
         $this->app->register(OrderServiceProvider::class);
@@ -86,5 +100,35 @@ class AppServiceProvider extends ServiceProvider
         $this->app->register(AdvertServiceProvider::class);
         $this->app->register(PaymentServiceProvider::class);
         $this->app->register(PointServiceProvider::class);
+        $this->app->register(MultiGrouponServiceProvider::class);
+        $this->app->register(ReduceServiceProvider::class);
+        $this->app->register(RefundServiceProvider::class);
+    }
+
+    public function registerDiscountComponent()
+    {
+        $this->app->bind(
+            ContainsCategoryRuleChecker::class,
+            ContainsCategoryRuleChecker::class
+        );
+        $this->app->alias(ContainsCategoryRuleChecker::class, ContainsCategoryRuleChecker::TYPE);
+
+        $this->app->bind(
+            ContainsProductRuleChecker::class,
+            ContainsProductRuleChecker::class
+        );
+        $this->app->alias(ContainsProductRuleChecker::class, ContainsProductRuleChecker::TYPE);
+
+        $this->app->bind(
+            UnitFixedDiscountAction::class,
+            UnitFixedDiscountAction::class
+        );
+        $this->app->alias(UnitFixedDiscountAction::class, UnitFixedDiscountAction::TYPE);
+
+        $this->app->bind(
+            UnitPercentageDiscountAction::class,
+            UnitPercentageDiscountAction::class
+        );
+        $this->app->alias(UnitPercentageDiscountAction::class, UnitPercentageDiscountAction::TYPE);
     }
 }

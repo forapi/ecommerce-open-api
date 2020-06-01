@@ -46,22 +46,21 @@ class AdvertItem extends Model
         return $this->morphTo();
     }
 
-    public function addChildren(array $attributes = []){
-
+    public function addChildren(array $attributes = [])
+    {
         $attributes['advert_id'] = $this->advert_id;
 
         $attributes['parent_id'] = $this->id;
 
         return AdvertItem::create($attributes);
-
     }
 
     public function getMetaAttribute($value)
     {
         if (!empty($value)) {
-            return json_decode($value,true);
+            return json_decode($value, true);
         }
+
         return $value;
     }
-
 }

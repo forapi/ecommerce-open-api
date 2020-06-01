@@ -59,4 +59,23 @@ class OrderPolicy
         //只有已收货的订单才能够进行评价商品和订单
         return $user->id == $order->user_id and $order->id == $orderItem->order_id and Order::STATUS_RECEIVED == $order->status;
     }
+
+    public function refund(User $user, Order $order, OrderItem $orderItem)
+    {
+        $refunds = $orderItem->refunds;
+
+        //如果已申请过2次售后,无法申请
+        if ($refunds->count() == 2) {
+            return false;
+        }
+
+        //如果申请了一次售后，并且未拒绝、未关闭,无法申请二次
+        if ($refunds->count() == 1 AND !in_array($refunds->first()->status, [2, 4])) {
+            return false;
+        }
+
+        return $user->id == $order->user_id AND $order->id == $orderItem->order_id
+            AND ($order->status == Order::STATUS_RECEIVED OR
+                $order->status == Order::STATUS_DELIVERED OR $order->status == Order::STATUS_PAY);
+    }
 }

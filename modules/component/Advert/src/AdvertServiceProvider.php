@@ -11,11 +11,11 @@
 
 namespace GuoJiangClub\Component\Advert;
 
-use Illuminate\Database\Eloquent\Relations\Relation;
 use GuoJiangClub\Component\Advert\Repositories\AdvertItemRepository;
 use GuoJiangClub\Component\Advert\Repositories\AdvertRepository;
 use GuoJiangClub\Component\Advert\Repositories\Eloquent\AdvertItemRepositoryEloquent;
 use GuoJiangClub\Component\Advert\Repositories\Eloquent\AdvertRepositoryEloquent;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AdvertServiceProvider extends ServiceProvider

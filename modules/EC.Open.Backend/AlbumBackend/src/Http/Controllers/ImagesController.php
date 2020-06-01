@@ -1,4 +1,10 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: admin
+ * Date: 2017/3/10
+ * Time: 14:07
+ */
 
 namespace GuoJiangClub\EC\Open\Backend\Album\Http\Controllers;
 
@@ -34,6 +40,10 @@ class ImagesController extends Controller
 
         $category = ImageCategory::find($id);
         $categorySub = ImageCategory::where('parent_id', $id)->get();
+
+        if (!$category) {
+            return response('图片分类不存在，请先去图片分类管理创建分类');
+        }
 
         return LaravelAdmin::content(function (Content $content) use ($imgList, $categories, $category, $categorySub) {
 

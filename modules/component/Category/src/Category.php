@@ -25,18 +25,17 @@ class Category extends Model
     /**
      * @var array
      */
-
     protected $guarded = ['id'];
 
     /**
      * Address constructor.
+     *
      * @param array $attributes
      */
     public function __construct(array $attributes = [])
     {
-        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_') . 'category');
+        $this->setTable(config('ibrand.app.database.prefix', 'ibrand_').'category');
 
         parent::__construct($attributes);
-
     }
 }

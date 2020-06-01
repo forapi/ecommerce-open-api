@@ -3,7 +3,7 @@
 /*
  * This file is part of ibrand/advert.
  *
- * (c) 果酱社区 <https://guojiang.club>
+ * (c) GuoJiangClub <https://www.ibrand.cc>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -44,6 +44,7 @@ class CreateAdvertTables extends Migration
                 $table->increments('id');
                 $table->string('name');
                 $table->string('code')->unique();//编码
+                $table->string('type')->default('default');// 默认
                 $table->integer('page_type')->default(1);//1默认 2首页 3分类页面
                 $table->string('link')->nullable();//推广链接
                 $table->string('link_image')->nullable();
@@ -88,10 +89,10 @@ class CreateAdvertTables extends Migration
      */
     public function down()
     {
-         $prefix = config('ibrand.app.database.prefix', 'ibrand_');
-         Schema::dropIfExists($prefix.'advert_item');
-         Schema::dropIfExists($prefix.'advert');
-         Schema::dropIfExists($prefix.'micro_page_advert');
-         Schema::dropIfExists($prefix.'micro_page');
+        $prefix = config('ibrand.app.database.prefix', 'ibrand_');
+        Schema::dropIfExists($prefix.'advert_item');
+        Schema::dropIfExists($prefix.'advert');
+        Schema::dropIfExists($prefix.'micro_page_advert');
+        Schema::dropIfExists($prefix.'micro_page');
     }
 }

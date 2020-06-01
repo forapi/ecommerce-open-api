@@ -19,21 +19,24 @@ use GuoJiangClub\Component\Discount\Applicators\DiscountApplicator;
 use GuoJiangClub\Component\Discount\Models\Coupon;
 use GuoJiangClub\Component\Discount\Models\Discount;
 use GuoJiangClub\Component\Discount\Repositories\CouponRepository;
+use GuoJiangClub\Component\MultiGroupon\Service\MultiGrouponService;
 use GuoJiangClub\Component\Order\Models\Comment;
 use GuoJiangClub\Component\Order\Models\Order;
 use GuoJiangClub\Component\Order\Models\OrderItem;
+use GuoJiangClub\Component\Order\Models\SpecialType;
 use GuoJiangClub\Component\Order\Repositories\OrderRepository;
 use GuoJiangClub\Component\Point\Repository\PointRepository;
+use GuoJiangClub\Component\Product\Models\Goods;
+use GuoJiangClub\Component\Product\Models\Product;
 use GuoJiangClub\Component\Product\Repositories\GoodsRepository;
 use GuoJiangClub\Component\Product\Repositories\ProductRepository;
+use GuoJiangClub\Component\Reduce\Service\ReduceService;
 use GuoJiangClub\Component\Shipping\Models\Shipping;
 use GuoJiangClub\EC\Open\Core\Applicators\PointApplicator;
 use GuoJiangClub\EC\Open\Core\Processor\OrderProcessor;
 use GuoJiangClub\EC\Open\Core\Services\DiscountService;
-use Illuminate\Support\Collection;
-use GuoJiangClub\Component\Product\Models\Goods;
-use GuoJiangClub\Component\Product\Models\Product;
 use iBrand\Shoppingcart\Item;
+use Illuminate\Support\Collection;
 
 class ShoppingController extends Controller
 {
@@ -47,20 +50,11 @@ class ShoppingController extends Controller
     private $orderProcessor;
     private $pointRepository;
     private $pointApplicator;
+    private $multiGrouponService;
+    private $reduceService;
 
-
-    public function __construct(GoodsRepository $goodsRepository
-        , ProductRepository $productRepository
-        , DiscountService $discountService
-        , OrderRepository $orderRepository
-        , CouponRepository $couponRepository
-        , DiscountApplicator $discountApplicator
-        , AddressRepository $addressRepository
-        , OrderProcessor $orderProcessor
-        , PointRepository $pointRepository
-        , PointApplicator $pointApplicator
-    )
-    {
+    public function __construct(GoodsRepository $goodsRepository, ProductRepository $productRepository, DiscountService $discountService, OrderRepository $orderRepository, CouponRepository $couponRepository, DiscountApplicator $discountApplicator, AddressRepository $addressRepository, OrderProcessor $orderProcessor, PointRepository $pointRepository, PointApplicator $pointApplicator, MultiGrouponService $multiGrouponService, ReduceService $reduceService
+    ) {
         $this->goodsRepository = $goodsRepository;
         $this->productRepository = $productRepository;
         $this->discountService = $discountService;
@@ -71,6 +65,8 @@ class ShoppingController extends Controller
         $this->orderProcessor = $orderProcessor;
         $this->pointRepository = $pointRepository;
         $this->pointApplicator = $pointApplicator;
+        $this->multiGrouponService = $multiGrouponService;
+        $this->reduceService = $reduceService;
     }
 
     public function checkout()
@@ -79,13 +75,23 @@ class ShoppingController extends Controller
 
         $checkoutType = $this->getCheckoutType();
 
-        $cartItems = call_user_func(array($this, 'getSelectedItemFrom' . $checkoutType));
+        $cartItems = call_user_func([$this, 'getSelectedItemFrom'.$checkoutType]);
 
         if (0 == $cartItems->count()) {
             return $this->failed('未选中商品，无法提交订单');
         }
 
         $order = new Order(['user_id' => request()->user()->id]);
+
+        //小拼团
+        if (!empty(request('multi_groupon_id'))) {
+            $order->type = Order::TYPE_MULTI_GROUPON;
+        }
+
+        //砍价
+        if (!empty(request('reduce_items_id'))) {
+            $order->type = Order::TYPE_REDUCE;
+        }
 
         //2. 生成临时订单对象
         $order = $this->buildOrderItemsFromCartItems($cartItems, $order);
@@ -108,6 +114,22 @@ class ShoppingController extends Controller
         //6.生成运费
         $order->payable_freight = 0;
 
+        //如果是小拼团,砍价订单不能使用促销活动和优惠券。
+        if (Order::TYPE_MULTI_GROUPON == $order->type || Order::TYPE_REDUCE == $order->type) {
+            $discounts = [];
+            $coupons = [];
+            $orderPoint = [];
+        }
+
+        if (Order::TYPE_MULTI_GROUPON == $order->type) {
+            SpecialType::create(['order_id' => $order->id, 'origin_type' => 'multi_groupon', 'origin_id' => request('multi_groupon_id')]);
+        }
+
+        //砍价
+        if (Order::TYPE_REDUCE == $order->type) {
+            SpecialType::create(['order_id' => $order->id, 'origin_type' => 'reduce_items', 'origin_id' => request('reduce_items_id')]);
+        }
+
         $discountGroup = $this->discountService->getOrderDiscountGroup($order, new Collection($discounts), new Collection($coupons));
 
         return $this->success([
@@ -115,9 +137,9 @@ class ShoppingController extends Controller
             'discounts' => $discounts,
             'coupons' => $coupons,
             'address' => $defaultAddress,
-            'discountGroup' => $discountGroup,
             'orderPoint' => $orderPoint,
             'best_discount_id' => $bestDiscountId,
+            'discountGroup' => $discountGroup,
             'best_coupon_id' => $bestCouponID,
             'best_coupon_adjustment_total' => $bestCouponAdjustmentTotal,
             'best_discount_adjustment_total' => $bestDiscountAdjustmentTotal,
@@ -149,7 +171,7 @@ class ShoppingController extends Controller
             $model = $item->getModel();
 
             if (!$model->getIsInSale($item->quantity)) {
-                return $this->failed('商品: ' . $item->name . ' ' . $item->item_meta['specs_text'] . ' 库存不够，请重新下单');
+                return $this->failed('商品: '.$item->name.' '.$item->item_meta['specs_text'].' 库存不够，请重新下单');
             }
         }
 
@@ -168,7 +190,6 @@ class ShoppingController extends Controller
             }
             //3. apply the available coupons
             if (empty($discount) or 1 != $discount->exclusive) {
-
                 $coupon = Coupon::find(request('coupon_id'));
                 if (!empty($coupon)) {
                     if (null != $coupon->used_at) {
@@ -202,7 +223,6 @@ class ShoppingController extends Controller
             //5. 保存订单状态
             $this->orderProcessor->submit($order);
 
-
             //6. remove goods store.
             foreach ($order->getItems() as $item) {
                 $product = $item->getModel();
@@ -218,13 +238,24 @@ class ShoppingController extends Controller
                 }
             }
 
+            //砍价
+            if (Order::TYPE_REDUCE == $order->type) {
+                event('order.reduce.special.type', [$order]);
+                if (0 == $order->getNeedPayAmount()) {
+                    $order->status = Order::STATUS_PAY;
+                    $order->pay_time = Carbon::now();
+                    $order->pay_status = 1;
+                    $order->save();
+                    event('order.paid', [$order]);
+                }
+            }
+
             DB::commit();
 
             return $this->success(['order' => $order], true);
-
         } catch (\Exception $exception) {
             DB::rollBack();
-            \Log::info($exception->getMessage() . $exception->getTraceAsString());
+            \Log::info($exception->getMessage().$exception->getTraceAsString());
 
             return $this->failed('订单提交失败');
         }
@@ -284,10 +315,11 @@ class ShoppingController extends Controller
 
             DB::commit();
 
-            return $this->api([], true, 200, '确认收货操作成功');
+            //return $this->api([], true, 200, '确认收货操作成功');
+            return $this->success();
         } catch (\Exception $exception) {
             DB::rollBack();
-            \Log::info($exception->getMessage() . $exception->getTraceAsString());
+            \Log::info($exception->getMessage().$exception->getTraceAsString());
             $this->response()->errorInternal($exception->getMessage());
         }
     }
@@ -322,7 +354,7 @@ class ShoppingController extends Controller
 
         foreach ($comments as $key => $comment) {
             if (!isset($comment['order_no']) or !$order = $this->orderRepository->getOrderByNo($comment['order_no'])) {
-                return $this->failed('订单 ' . $comment['order_no'] . ' 不存在');
+                return $this->failed('订单 '.$comment['order_no'].' 不存在');
             }
 
             if (!isset($comment['order_item_id']) or !$orderItem = OrderItem::find($comment['order_item_id'])) {
@@ -383,7 +415,7 @@ class ShoppingController extends Controller
             if (!$this->checkItemStock($item)) {
                 Cart::update($key, ['message' => '库存数量不足', 'status' => 'onhand']);
 
-                throw new \Exception('商品: ' . $item->name . ' ' . $item->color . ',' . $item->size . ' 库存数量不足');
+                throw new \Exception('商品: '.$item->name.' '.$item->color.','.$item->size.' 库存数量不足');
             }
         }
 
@@ -415,13 +447,15 @@ class ShoppingController extends Controller
 
         if ($discounts) {
             if (0 == count($discounts)) { //修复过滤后discount为0时非false 的问题。
-                $discounts = false;
+                $discounts = [];
             } else {
                 $bestDiscount = $discounts->sortBy('adjustmentTotal')->first();
                 $bestDiscountId = $bestDiscount->id;
                 $bestDiscountAdjustmentTotal = -$bestDiscount->adjustmentTotal;
                 $discounts = collect_to_array($discounts);
             }
+        } else {
+            $discounts = [];
         }
 
         return [$discounts, $bestDiscountAdjustmentTotal, $bestDiscountId];
@@ -479,8 +513,13 @@ class ShoppingController extends Controller
             ];
 
             $orderItem = new OrderItem(['quantity' => $item->qty, 'unit_price' => $item->model->sell_price,
-                'item_id' => $item->id, 'type' => $item->__model, 'item_name' => $item->name, 'item_meta' => $item_meta,
+                                        'item_id' => $item->id, 'type' => $item->__model, 'item_name' => $item->name, 'item_meta' => $item_meta,
             ]);
+
+            if (Order::TYPE_MULTI_GROUPON == $order->type || Order::TYPE_REDUCE) { //拼团砍价设置为商品价格
+                $orderItem->unit_price = $item->price;
+                $orderItem->units_total = $item->price * $item->qty;
+            }
 
             $orderItem->recalculateUnitsTotal();
 
@@ -509,9 +548,9 @@ class ShoppingController extends Controller
         $data['tracking'] = uniqid();
 
         if (Shipping::create($data)) {
-
             $order->status = 3;
             $order->save();
+
             return $this->success();
         }
 
@@ -530,11 +569,12 @@ class ShoppingController extends Controller
         }
     }
 
-
     /**
      * confirm user point can be used in this order.
+     *
      * @param $order
      * @param $point
+     *
      * @return bool
      */
     private function checkUserPoint($order, $point)
@@ -553,29 +593,44 @@ class ShoppingController extends Controller
 
     private function getCheckoutType()
     {
-        if ($ids = request('cart_ids') AND count($ids) > 0)
+        if ($ids = request('cart_ids') and count($ids) > 0) {
             return 'Cart';
-        if (request('product_id'))
+        }
+        if (request('multi_groupon_id')) {
+            return 'MultiGroupon';
+        }
+        if (request('reduce_items_id')) {
+            return 'Reducen';
+        }
+        if (request('product_id')) {
             return 'Product';
+        }
+
         return 'Cart';
     }
 
     private function getSelectedItemFromProduct()
     {
         $cartItems = new Collection();
+
         $productId = request('product_id');
-        $__raw_id = md5(time() . request('product_id'));
+
+        $__raw_id = md5(time().request('product_id'));
+
         $item = request()->all();
+
         $input = ['__raw_id' => $__raw_id,
-            'id' => $productId,    //如果是SKU，表示SKU id，否则是SPU ID
-            'img' => isset($item['attributes']['img']) ? $item['attributes']['img'] : '',
-            'qty' => request('qty'),
-            'total' => isset($item['total']) ? $item['total'] : '',
+                  'id' => $productId,    //如果是SKU，表示SKU id，否则是SPU ID
+                  'img' => isset($item['attributes']['img']) ? $item['attributes']['img'] : '',
+                  'qty' => request('qty'),
+                  'total' => isset($item['total']) ? $item['total'] : '',
         ];
+
         if (isset($item['attributes']['sku'])) {
             $product = Product::find($productId);
             $input['name'] = $product->name;
             $input['price'] = $product->sell_price;
+
             $input['color'] = isset($item['attributes']['color']) ? $item['attributes']['color'] : [];
             $input['size'] = isset($item['attributes']['size']) ? $item['attributes']['size'] : [];
             $input['com_id'] = isset($item['attributes']['com_id']) ? $item['attributes']['com_id'] : [];
@@ -585,14 +640,78 @@ class ShoppingController extends Controller
             $goods = Goods::find($productId);
             $input['name'] = $goods->name;
             $input['price'] = $goods->sell_price;
+
             $input['size'] = isset($item['size']) ? $item['size'] : '';
             $input['color'] = isset($item['color']) ? $item['color'] : '';
             $input['type'] = 'spu';
             $input['__model'] = Goods::class;
             $input['com_id'] = $item['id'];
         }
+
         $data = new Item(array_merge($input), $item);
+
         $cartItems->put($__raw_id, $data);
+
+        return $cartItems;
+    }
+
+    /**
+     * 小拼团数据检测.
+     *
+     * @return Collection
+     *
+     * @throws \Exception
+     */
+    private function getSelectedItemFromMultiGroupon()
+    {
+        $user = request()->user();
+        $cartItems = new Collection();
+        if ($multiGrouponID = request('multi_groupon_id')) {
+            \Log::info($multiGrouponID);
+            $buys = request()->all();
+
+            $this->multiGrouponService->checkGrouponStatusByUser($user->id, $multiGrouponID, request('multi_groupon_item_id'));
+
+            $cartItems = $this->multiGrouponService->makeCartItems($buys, $multiGrouponID);
+        }
+
+        foreach ($cartItems as $key => $item) {
+            //检查库存是否足够
+            if (!$this->checkItemStock($item)) {
+                throw new \Exception('商品: '.$item->name.' '.$item->color.','.$item->size.' 库存数量不足');
+            }
+        }
+
+        return $cartItems;
+    }
+
+    /**
+     * 砍价数据检测.
+     *
+     * @return Collection
+     *
+     * @throws \Exception
+     */
+    private function getSelectedItemFromReducen()
+    {
+        $user = request()->user();
+        $cartItems = new Collection();
+        if ($reduce_items_id = request('reduce_items_id')) {
+            \Log::info($reduce_items_id);
+            $buys = request()->all();
+
+            $this->reduceService->checkReduceStatusByUser($user->id, $reduce_items_id);
+
+            $cartItems = $this->reduceService->makeCartItems($buys, $reduce_items_id);
+        }
+
+        foreach ($cartItems as $key => $item) {
+            //检查库存是否足够
+            if (!$this->checkItemStock($item)) {
+                throw new \Exception('商品: '.$item->name.' '.$item->color.','.$item->size.' 库存数量不足');
+            }
+        }
+
         return $cartItems;
     }
 }
